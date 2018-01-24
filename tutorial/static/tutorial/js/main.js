@@ -1,5 +1,10 @@
 'use strict';
 
+var ws = new WebSocket('ws://' + window.location.host + window.location.pathname);
+
+
+
+
 var startButton = document.getElementById('startButton');
 var callButton = document.getElementById('callButton');
 var hangupButton = document.getElementById('hangupButton');
@@ -52,6 +57,7 @@ function getOtherPc(pc) {
 }
 
 function gotStream(stream) {
+  debugger;
   trace('Received local stream');
   localVideo.srcObject = stream;
   // Add localStream to global scope so it's accessible from the browser console
@@ -238,3 +244,18 @@ function trace(text) {
     console.log(text);
   }
 }
+
+// debugger;
+// var localVideo = document.getElementById('localVideo');
+
+// var streamToAttach;
+// navigator.webkitGetUserMedia({ audio: true, video: true }, function (stream) {
+//     localVideo.srcObject = webkitURL.createObjectURL(stream);
+//     window.localStream = streamToAttach = stream;
+// }, function(error) {
+//     alert(error);
+// });
+
+// var peerConnection = new webkitRTCPeerConnection(
+//     { "iceServers": [{ "url": "stun:stun.l.google.com:19302" }] }
+// );

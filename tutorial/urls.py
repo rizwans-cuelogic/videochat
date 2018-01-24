@@ -4,6 +4,10 @@ from . import views
 
 urlpatterns = [
 	
-	url(r'^$',views.index,name='index')
+	# url(r'^',views.home,name='home'),
+	# url(r'^createroom/$',views.createroom,name='createroom'),
+	url(r'^$', views.home, name="home"),
+    url(r'^createroom/$', views.createroom, name='createroom'),
+    url(r'^room/(?P<room>[^/]+)/$',views.room,name='room')
 
 ]
