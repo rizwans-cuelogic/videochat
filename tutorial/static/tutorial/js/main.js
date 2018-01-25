@@ -1,7 +1,7 @@
 'use strict';
 
 //var ws = new WebSocket('ws://' + window.location.host + window.location.pathname);
-
+debugger;
 var channel = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
 
 var pub = 'pub-f986077a-73bd-4c28-8e50-2e44076a84e0';
@@ -26,6 +26,7 @@ websocket.send = function(data) {
 
 var peer = new PeerConnection(websocket);
 peer.onUserFound = function(userid) {
+    console.log(userid,'========userid======');
     if (document.getElementById(userid)) return;
     var tr = document.createElement('tr');
 
@@ -54,7 +55,10 @@ peer.onUserFound = function(userid) {
 };
 
 peer.onStreamAdded = function(e) {
-    if (e.type == 'local') document.querySelector('#start-broadcasting').disabled = false;
+    console.log(e,'===e===', e.type);
+    if (e.type == 'local'){
+     document.querySelector('#start-broadcasting').disabled = false;
+    }
     var video = e.mediaElement;
 
     video.setAttribute('width', 600);
@@ -80,6 +84,7 @@ peer.onStreamEnded = function(e) {
 };
 
 document.querySelector('#start-broadcasting').onclick = function() {
+    debugger;
     this.disabled = true;
     getUserMedia(function(stream) {
         peer.addStream(stream);
@@ -88,6 +93,7 @@ document.querySelector('#start-broadcasting').onclick = function() {
 };
 
 document.querySelector('#your-name').onchange = function() {
+    debugger;
     peer.userid = this.value;
 };
 
