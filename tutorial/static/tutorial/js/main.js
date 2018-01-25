@@ -1,261 +1,171 @@
 'use strict';
 
-var ws = new WebSocket('ws://' + window.location.host + window.location.pathname);
+//var ws = new WebSocket('ws://' + window.location.host + window.location.pathname);
 
+var channel = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
 
+var pub = 'pub-f986077a-73bd-4c28-8e50-2e44076a84e0';
+var sub = 'sub-b8f4c07a-352e-11e2-bb9d-c7df1d04ae4a';
 
+WebSocket  = PUBNUB.ws;
 
-// var startButton = document.getElementById('startButton');
-// var callButton = document.getElementById('callButton');
-// var hangupButton = document.getElementById('hangupButton');
-// callButton.disabled = true;
-// hangupButton.disabled = true;
-// startButton.onclick = start;
-// callButton.onclick = call;
-// hangupButton.onclick = hangup;
+var websocket = new WebSocket('wss://pubsub.pubnub.com/' + pub + '/' + sub + '/' + channel);
 
-// var startTime;
-// var localVideo = document.getElementById('localVideo');
-// var remoteVideo = document.getElementById('remoteVideo');
+websocket.onerror = function() {
+    //location.reload();
+};
 
-// localVideo.addEventListener('loadedmetadata', function() {
-//   trace('Local video videoWidth: ' + this.videoWidth +
-//     'px,  videoHeight: ' + this.videoHeight + 'px');
-// });
+websocket.onclose = function() {
+    //location.reload();
+};
 
-// remoteVideo.addEventListener('loadedmetadata', function() {
-//   trace('Remote video videoWidth: ' + this.videoWidth +
-//     'px,  videoHeight: ' + this.videoHeight + 'px');
-// });
+websocket.push = websocket.send;
+websocket.send = function(data) {
+    websocket.push(JSON.stringify(data));
+};
 
-// remoteVideo.onresize = function() {
-//   trace('Remote video size changed to ' +
-//     remoteVideo.videoWidth + 'x' + remoteVideo.videoHeight);
-//   // We'll use the first onresize callback as an indication that video has started
-//   // playing out.
-//   if (startTime) {
-//     var elapsedTime = window.performance.now() - startTime;
-//     trace('Setup time: ' + elapsedTime.toFixed(3) + 'ms');
-//     startTime = null;
-//   }
-// };
+var peer = new PeerConnection(websocket);
+peer.onUserFound = function(userid) {
+    if (document.getElementById(userid)) return;
+    var tr = document.createElement('tr');
 
-// var localStream;
-// var pc1;
-// var pc2;
-// var offerOptions = {
-//   offerToReceiveAudio: 1,
-//   offerToReceiveVideo: 1
-// };
+    var td1 = document.createElement('td');
+    var td2 = document.createElement('td');
 
-// function getName(pc) {
-//   return (pc === pc1) ? 'pc1' : 'pc2';
-// }
+    td1.innerHTML = userid + ' has camera. Are you interested in video chat?';
 
-// function getOtherPc(pc) {
-//   return (pc === pc1) ? pc2 : pc1;
-// }
+    var button = document.createElement('button');
+    button.innerHTML = 'Join';
+    button.id = userid;
+    button.style.float = 'right';
+    button.onclick = function() {
+        button = this;
+        getUserMedia(function(stream) {
+            peer.addStream(stream);
+            peer.sendParticipationRequest(button.id);
+        });
+        button.disabled = true;
+    };
+    td2.appendChild(button);
 
-// function gotStream(stream) {
-//   debugger;
-//   trace('Received local stream');
-//   localVideo.srcObject = stream;
-//   // Add localStream to global scope so it's accessible from the browser console
-//   window.localStream = localStream = stream;
-//   callButton.disabled = false;
-// }
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    roomsList.appendChild(tr);
+};
 
-// function start() {
-//   debugger;
-//   trace('Requesting local stream');
-//   startButton.disabled = true;
-//   navigator.mediaDevices.getUserMedia({
-//     audio: true,
-//     video: true
-//   })
-//   .then(gotStream)
-//   .catch(function(e) {
-//     alert('getUserMedia() error: ' + e.name);
-//   });
-// }
+peer.onStreamAdded = function(e) {
+    if (e.type == 'local') document.querySelector('#start-broadcasting').disabled = false;
+    var video = e.mediaElement;
 
-// function call() {
-//   callButton.disabled = true;
-//   hangupButton.disabled = false;
-//   trace('Starting call');
-//   startTime = window.performance.now();
-//   var videoTracks = localStream.getVideoTracks();
-//   var audioTracks = localStream.getAudioTracks();
-//   if (videoTracks.length > 0) {
-//     trace('Using video device: ' + videoTracks[0].label);
-//   }
-//   if (audioTracks.length > 0) {
-//     trace('Using audio device: ' + audioTracks[0].label);
-//   }
-//   var servers = null;
-//   // Add pc1 to global scope so it's accessible from the browser console
-//   window.pc1 = pc1 = new RTCPeerConnection(servers);
-//   trace('Created local peer connection object pc1');
-//   pc1.onicecandidate = function(e) {
-//     onIceCandidate(pc1, e);
-//   };
-//   // Add pc2 to global scope so it's accessible from the browser console
-//   window.pc2 = pc2 = new RTCPeerConnection(servers);
-//   trace('Created remote peer connection object pc2');
-//   pc2.onicecandidate = function(e) {
-//     onIceCandidate(pc2, e);
-//   };
-//   pc1.oniceconnectionstatechange = function(e) {
-//     onIceStateChange(pc1, e);
-//   };
-//   pc2.oniceconnectionstatechange = function(e) {
-//     onIceStateChange(pc2, e);
-//   };
-//   pc2.onaddstream = gotRemoteStream;
+    video.setAttribute('width', 600);
+    video.setAttribute('controls', true);
 
-//   pc1.addStream(localStream);
-//   trace('Added local stream to pc1');
+    videosContainer.insertBefore(video, videosContainer.firstChild);
 
-//   trace('pc1 createOffer start');
-//   pc1.createOffer(
-//     offerOptions
-//   ).then(
-//     onCreateOfferSuccess,
-//     onCreateSessionDescriptionError
-//   );
-// }
+    video.play();
+    rotateVideo(video);
+    scaleVideos();
+};
 
-// function onCreateSessionDescriptionError(error) {
-//   trace('Failed to create session description: ' + error.toString());
-// }
+peer.onStreamEnded = function(e) {
+    var video = e.mediaElement;
+    if (video) {
+        video.style.opacity = 0;
+        rotateVideo(video);
+        setTimeout(function() {
+            video.parentNode.removeChild(video);
+            scaleVideos();
+        }, 1000);
+    }
+};
 
-// function onCreateOfferSuccess(desc) {
-//   trace('Offer from pc1\n' + desc.sdp);
-//   trace('pc1 setLocalDescription start');
-//   pc1.setLocalDescription(desc).then(
-//     function() {
-//       onSetLocalSuccess(pc1);
-//     },
-//     onSetSessionDescriptionError
-//   );
-//   trace('pc2 setRemoteDescription start');
-//   pc2.setRemoteDescription(desc).then(
-//     function() {
-//       onSetRemoteSuccess(pc2);
-//     },
-//     onSetSessionDescriptionError
-//   );
-//   trace('pc2 createAnswer start');
-//   // Since the 'remote' side has no media stream we need
-//   // to pass in the right constraints in order for it to
-//   // accept the incoming offer of audio and video.
-//   pc2.createAnswer().then(
-//     onCreateAnswerSuccess,
-//     onCreateSessionDescriptionError
-//   );
-// }
+document.querySelector('#start-broadcasting').onclick = function() {
+    this.disabled = true;
+    getUserMedia(function(stream) {
+        peer.addStream(stream);
+        peer.startBroadcasting();
+    });
+};
 
-// function onSetLocalSuccess(pc) {
-//   trace(getName(pc) + ' setLocalDescription complete');
-// }
+document.querySelector('#your-name').onchange = function() {
+    peer.userid = this.value;
+};
 
-// function onSetRemoteSuccess(pc) {
-//   trace(getName(pc) + ' setRemoteDescription complete');
-// }
+var videosContainer = document.getElementById('videos-container') || document.body;
+var btnSetupNewRoom = document.getElementById('setup-new-room');
+var roomsList = document.getElementById('rooms-list');
 
-// function onSetSessionDescriptionError(error) {
-//   trace('Failed to set session description: ' + error.toString());
-// }
+if (btnSetupNewRoom) btnSetupNewRoom.onclick = setupNewRoomButtonClickHandler;
 
-// function gotRemoteStream(e) {
-//   // Add remoteStream to global scope so it's accessible from the browser console
-//   window.remoteStream = remoteVideo.srcObject = e.stream;
-//   trace('pc2 received remote stream');
-// }
+function rotateVideo(video) {
+    video.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(0deg)';
+    setTimeout(function() {
+        video.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(360deg)';
+    }, 1000);
+}
 
-// function onCreateAnswerSuccess(desc) {
-//   trace('Answer from pc2:\n' + desc.sdp);
-//   trace('pc2 setLocalDescription start');
-//   pc2.setLocalDescription(desc).then(
-//     function() {
-//       onSetLocalSuccess(pc2);
-//     },
-//     onSetSessionDescriptionError
-//   );
-//   trace('pc1 setRemoteDescription start');
-//   pc1.setRemoteDescription(desc).then(
-//     function() {
-//       onSetRemoteSuccess(pc1);
-//     },
-//     onSetSessionDescriptionError
-//   );
-// }
+function scaleVideos() {
+    var videos = document.querySelectorAll('video'),
+        length = videos.length,
+        video;
 
-// function onIceCandidate(pc, event) {
-//   if (event.candidate) {
-//     getOtherPc(pc).addIceCandidate(
-//       new RTCIceCandidate(event.candidate)
-//     ).then(
-//       function() {
-//         onAddIceCandidateSuccess(pc);
-//       },
-//       function(err) {
-//         onAddIceCandidateError(pc, err);
-//       }
-//     );
-//     trace(getName(pc) + ' ICE candidate: \n' + event.candidate.candidate);
-//   }
-// }
+    var minus = 130;
+    var windowHeight = 700;
+    var windowWidth = 600;
+    var windowAspectRatio = windowWidth / windowHeight;
+    var videoAspectRatio = 4 / 3;
+    var blockAspectRatio;
+    var tempVideoWidth = 0;
+    var maxVideoWidth = 0;
 
-// function onAddIceCandidateSuccess(pc) {
-//   trace(getName(pc) + ' addIceCandidate success');
-// }
+    for (var i = length; i > 0; i--) {
+        blockAspectRatio = i * videoAspectRatio / Math.ceil(length / i);
+        if (blockAspectRatio <= windowAspectRatio) {
+            tempVideoWidth = videoAspectRatio * windowHeight / Math.ceil(length / i);
+        } else {
+            tempVideoWidth = windowWidth / i;
+        }
+        if (tempVideoWidth > maxVideoWidth)
+            maxVideoWidth = tempVideoWidth;
+    }
+    for (var i = 0; i < length; i++) {
+        video = videos[i];
+        if (video)
+            video.width = maxVideoWidth - minus;
+    }
+}
 
-// function onAddIceCandidateError(pc, error) {
-//   trace(getName(pc) + ' failed to add ICE Candidate: ' + error.toString());
-// }
+window.onresize = scaleVideos;
 
-// function onIceStateChange(pc, event) {
-//   if (pc) {
-//     trace(getName(pc) + ' ICE state: ' + pc.iceConnectionState);
-//     console.log('ICE state change event: ', event);
-//   }
-// }
+// you need to capture getUserMedia yourself!
+function getUserMedia(callback) {
+    var hints = {
+        audio: true,
+        video: {
+            optional: [],
+            mandatory: {}
+        }
+    };
+    navigator.getUserMedia(hints, function(stream) {
+        var video = document.createElement('video');
+        video.src = URL.createObjectURL(stream);
+        video.controls = true;
+        video.muted = true;
 
-// function hangup() {
-//   trace('Ending call');
-//   pc1.close();
-//   pc2.close();
-//   pc1 = null;
-//   pc2 = null;
-//   hangupButton.disabled = true;
-//   callButton.disabled = false;
-// }
+        peer.onStreamAdded({
+            mediaElement: video,
+            userid: 'self',
+            stream: stream
+        });
 
+        callback(stream);
+    });
+}
 
-// function trace(text) {
-//   if (text[text.length - 1] === '\n') {
-//     text = text.substring(0, text.length - 1);
-//   }
-//   if (window.performance) {
-//     var now = (window.performance.now() / 1000).toFixed(3);
-//     console.log(now + ': ' + text);
-//   } else {
-//     console.log(text);
-//   }
-// }
-
-// debugger;
-var localVideo = document.getElementById('localVideo');
-
-var streamToAttach;
-navigator.webkitGetUserMedia({ audio: true, video: true }, function (stream) {
-    localVideo.srcObject = webkitURL.createObjectURL(stream);
-    window.localStream = streamToAttach = stream;
-}, function(error) {
-    alert(error);
-});
-
-var peerConnection = new webkitRTCPeerConnection(
-    { "iceServers": [{ "url": "stun:stun.l.google.com:19302" }] }
-);
+(function() {
+    var uniqueToken = document.getElementById('unique-token');
+    if (uniqueToken)
+        if (location.hash.length > 2) uniqueToken.parentNode.parentNode.parentNode.innerHTML = '<h2 style="text-align:center;"><a href="' + location.href + '" target="_blank">Share this link</a></h2>';
+        else uniqueToken.innerHTML = uniqueToken.parentNode.parentNode.href = '#' + (Math.random() * new Date().getTime()).toString(36).toUpperCase().replace(/\./g, '-');
+})();
+      
