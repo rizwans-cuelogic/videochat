@@ -1,7 +1,7 @@
 'use strict';
 
 //var ws = new WebSocket('ws://' + window.location.host + window.location.pathname);
-debugger;
+
 var channel = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
 
 var pub = 'pub-f986077a-73bd-4c28-8e50-2e44076a84e0';
@@ -174,4 +174,33 @@ function getUserMedia(callback) {
         if (location.hash.length > 2) uniqueToken.parentNode.parentNode.parentNode.innerHTML = '<h2 style="text-align:center;"><a href="' + location.href + '" target="_blank">Share this link</a></h2>';
         else uniqueToken.innerHTML = uniqueToken.parentNode.parentNode.href = '#' + (Math.random() * new Date().getTime()).toString(36).toUpperCase().replace(/\./g, '-');
 })();
-      
+
+
+
+
+
+// navigator.getUserMedia = navigator.webkitGetUserMedia 
+                    
+// var constraints = {
+//   audio: false,
+//   video: true
+// };
+
+// var video = document.querySelector('video');
+
+// function successCallback(stream) {
+//   debugger;  
+//   window.stream = stream; // stream available to console
+//   if (window.URL) {
+//     video.src = window.URL.createObjectURL(stream);
+//   } else {
+//     video.src = stream;
+//   }
+// }
+
+// function errorCallback(error) {
+//   debugger;  
+//   console.log('navigator.getUserMedia error: ', error);
+// }
+
+// navigator.getUserMedia(constraints, successCallback, errorCallback);      
