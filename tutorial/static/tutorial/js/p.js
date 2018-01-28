@@ -44,6 +44,7 @@
 
         // if someone shared SDP
         this.onsdp = function (message) {
+            debugger;
             var sdp = message.sdp;
 
             if (sdp.type == 'offer') {
@@ -59,6 +60,7 @@
         };
 
         root.acceptRequest = function (userid) {
+            debugger;
             root.peers[userid] = Offer.createOffer(merge(options, {
                 MediaStream: root.MediaStream
             }));
@@ -67,6 +69,7 @@
         var candidates = [];
         // if someone shared ICE
         this.onice = function (message) {
+            debugger;
             var peer = root.peers[message.userid];
             if (peer) {
                 peer.addIceCandidate(message.candidate);
@@ -80,6 +83,7 @@
         // it is passed over Offer/Answer objects for reusability
         var options = {
             onsdp: function (sdp) {
+                debugger;
                 socket.send({
                     userid: root.userid,
                     sdp: sdp,
@@ -87,6 +91,7 @@
                 });
             },
             onicecandidate: function (candidate) {
+                debugger;
                 socket.send({
                     userid: root.userid,
                     candidate: candidate,
@@ -94,6 +99,7 @@
                 });
             },
             onStreamAdded: function (stream) {
+                debugger;
                 console.debug('onStreamAdded', '>>>>>>', stream);
 
                 stream.onended = function () {
@@ -215,8 +221,8 @@
     var RTCSessionDescription = window.mozRTCSessionDescription || window.RTCSessionDescription;
     var RTCIceCandidate = window.mozRTCIceCandidate || window.RTCIceCandidate;
 
-    navigator.getUserMedia = navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
-    window.URL = window.webkitURL || window.URL;
+    navigator.getUserMedia =  navigator.webkitGetUserMedia || navigator.mozGetUserMedia ;
+    window.URL = window.URL || window.webkitURL ;
 
     var isFirefox = !!navigator.mozGetUserMedia;
     var isChrome = !!navigator.webkitGetUserMedia;
@@ -231,7 +237,7 @@
     };
 
     var iceServers = {
-        iceServers: [STUN]
+        iceServers: [STUN,TURN]
     };
 
     if (isChrome) {
@@ -270,6 +276,7 @@
     // offer.addIceCandidate(candidate);
     var Offer = {
         createOffer: function (config) {
+            debugger;
             var peer = new RTCPeerConnection(iceServers, optionalArgument);
 
             if (config.MediaStream) peer.addStream(config.MediaStream);
@@ -283,6 +290,7 @@
             };
 
             peer.createOffer(function (sdp) {
+                debugger;
                 peer.setLocalDescription(sdp);
                 config.onsdp(sdp);
             }, onSdpError, offerAnswerConstraints);
@@ -307,6 +315,7 @@
     // answer.addIceCandidate(candidate);
     var Answer = {
         createAnswer: function (config) {
+            debugger;
             var peer = new RTCPeerConnection(iceServers, optionalArgument);
 
             if (config.MediaStream) peer.addStream(config.MediaStream);
@@ -330,11 +339,18 @@
             return this;
         },
         addIceCandidate: function (candidate) {
+            debugger;
             this.peer.addIceCandidate(new RTCIceCandidate({
                 sdpMLineIndex: candidate.sdpMLineIndex,
                 candidate: candidate.candidate
             }));
         }
+
+        // "candidate": {
+        // "candidate": "candidate:594295617 2 udp 2122262782 2405:204:97a1:433c:606d:1beb:685c:219a 58782 typ host generation 0",
+        // "sdpMid": "audio",
+        // "sdpMLineIndex": 0
+        // }
     };
 
     function merge(mergein, mergeto) {

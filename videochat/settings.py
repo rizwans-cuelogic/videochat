@@ -39,8 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',
     'tutorial.apps.TutorialConfig',
-    'sslserver',
-    'django_extensions',
+    # 'sslserver',
+    # 'django_extensions',
 ]
 
 MIDDLEWARE = [
