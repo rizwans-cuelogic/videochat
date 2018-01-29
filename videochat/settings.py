@@ -25,7 +25,7 @@ SECRET_KEY = 'lv(2_fnx97r-&y(!xwora39w73dk8#qj-piw7u1cfjl4bn(j&m'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'channels',
-    'tutorial.apps.TutorialConfig'
+    'tutorial.apps.TutorialConfig',
+    'sslserver'
 ]
 
 MIDDLEWARE = [
