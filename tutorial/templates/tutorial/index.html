@@ -2,12 +2,12 @@
 <head>
 <title>WebSockets | WebRTC One-to-One Video Chat</title>
 
-        <script>
+       <!--  <script>
             if(!location.hash.replace('#', '').length) {
                 location.href = location.href.split('#')[0] + '#' + (Math.random() * 100).toString().replace('.', '');
                 location.reload();
             }
-        </script>
+        </script> -->
         
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta charset="utf-8">
@@ -18,9 +18,19 @@
         <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
 		
         <!-- scripts used for peers connection -->
-        <script src="https://cdn.webrtc-experiment.com/websocket/PeerConnection.js"> </script>
+       <!--  <script src="https://cdn.webrtc-experiment.com/websocket/PeerConnection.js"> </script>
         <script src="https://cdn.webrtc-experiment.com/view/websocket.js"> </script>
+ -->
 
+    <script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
+    <script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
+    <style>
+        video{
+            width:30%;
+            border-radius:15px;
+        }
+
+    </style>
 </head>
 
 <body>
@@ -28,20 +38,29 @@
 	<!-- <a href="{% url 'createroom' %}">Join room</a> -->
 
 	<section class="experiment">
-                <section>
+        <!--<section>
 		          	<span>
 		             <a href="/websocket/" target="_blank" title="Setup Private Room!"><code><strong id="unique-token">#123456789</strong></code></a>
 		           </span>
             		<input type="text" id="your-name" placeholder="your-name">
             		<button id="start-broadcasting" class="setup">Join</button>
-                </section>
+                </section>-->
 
                 <!-- list of all available conferencing rooms -->
-                <table id="rooms-list" style="width: 100%;"></table>
+                <!--<table id="rooms-list" style="width: 100%;"></table>-->
 
                 <!-- local/remote videos container -->
-                <div id="videos-container"></div>
-    </section>
+                <!--<div id="videos-container"></div>-->
+        <input id="roomid" placeholder="Unique room id"></input>
+        <button id="btn-open-or-join">
+            open or join room
+        </button>
 
+        <div id="local-video-container">
+        </div>
+        <div id="remote-video-container">
+        </div>
+    </section>
+ 
 	<script type="text/javascript" src="{% static 'tutorial/js/main.js' %}"></script>
 </body>
