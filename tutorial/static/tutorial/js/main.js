@@ -71,7 +71,9 @@ document.getElementById('btn-exit').onclick  = function() {
 		remotelist.forEach(function(remoteStream) {
 			debugger;
         	remoteStream.stop();
+        	connection.remove(remoteStream);
     	});
+
 	}
 
 	connection.attachStreams.forEach(function(localStream) {

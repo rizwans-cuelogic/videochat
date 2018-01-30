@@ -7,9 +7,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
         <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <link rel="stylesheet" type="text/css" href="{% static 'tutorial/bootstrap-3.3.7-dist/css/bootstrap.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'tutorial/bootstrap-3.3.7-dist/css/bootstrap-theme.min.css' %}"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
-		
-        <script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
+		<script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
         <script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
         <style>
         video{
@@ -33,29 +35,32 @@
 </head>
 
 <body>
-
-
-	<section class="experiment">
-
-        <input type="text" id="roomid" placeholder="Unique room id"></input>
-        <button id="btn-open-or-join">
-            open or join room
-        </button>
-
-        <br><br>
-
+    <div class="container">
+    <div class="row">
+    <h3 class="lead text-center">Video Conferencing</h3>
+    <div class="col-md-offset-3 col-md-4">
+	   <div class="from-group">
+        <input class="form-control" type="text" id="roomid" placeholder="Unique room id">
+        </div>
+    </div>
+    <div class="col-md-4">
+        <a class="btn btn-success" id="btn-open-or-join">open or join room</a>
+    </div>
+    </div>
+    
+    <div class="row">
+    <div class="col-md-offset-3"> 
         <div id="local-video-container">
         <button id="btn-exit">exit</button>
 
         </div>
-        
+    </div>   
         <hr>
 
         <div id="remote-video-container">
        
 
-        </div>
-
-    </section> 
+        </div> 
+    </div>
 	<script type="text/javascript" src="{% static 'tutorial/js/main.js' %}"></script>
 </body>
