@@ -16,6 +16,13 @@ connection.sdpConstraints.mandatory = {
 
 var room_id = document.getElementById('roomid')
 
+var all_button =`<button id="btn-mute">mute</button>
+				<button id="btn-plus">plus</button>
+            	<button id="btn-minus">minus</button>
+           	 	<button id="btn-full">full</button>
+            	<button id="btn-share">share</button>
+            	<button id="btn-exit">ex</button>`
+
 //var close_room = document.getElementById('roomid')
 var streamid;
 var localVideo = document.getElementById('local-video-container')
@@ -34,29 +41,23 @@ connection.onstream = function(event){
 
 	var video = event.mediaElement
 
-	// if (video.hasAttribute("controls")) {
- //    	video.removeAttribute("controls");   
- //  	}    
-
 	if(event.type==='local')
 	{
+		debugger;
+		var i;
 		var elementdiv = document.createElement("div");
 		elementdiv.classList.add("btnPanel");
-		var elementbt = document.createElement("button");
-		elementbt.setAttribute("id", "btn-exit");
-		var t = document.createTextNode("Exit");
-		elementbt.onclick = exit_fun
-		elementbt.appendChild(t);
+
 		localVideo.appendChild(elementdiv);
-		elementdiv.appendChild(elementbt);
+		html = $.parseHTML( all_button );
+		for(i=0; i<html.length;i++){
+			elementdiv.appendChild(html[i]);
+		}
 		localVideo.appendChild(video);
 		var localStream = connection.attachStreams[0];
 		localStream.mute('audio');
 
-		if(exit_bt != null){
-			exit_bt.style.display="block";
-		}		
-		debugger;
+		addButtonEvent();
 	}
 	if(event.type==='remote'){
 
@@ -107,6 +108,18 @@ document.getElementById('btn-open-or-join').onclick = function(){
 // 	connection.close();
 // }
 
+function addButtonEvent(){
+	debugger;
+	$("#btn-exit").on("click",exit_fun);
+	$("#btn-mute").on("click",mute_fun);
+	$("#btn-plus").on("click",plus_fun);
+	$("#btn-minus").on("click",minus_fun);
+	$("#btn-full").on("click",full_fun);
+	$("#btn-share").on("click",share_fun);
+}
+
+
+
 function exit_fun() {
      
 	if(connection.isInitiator){
@@ -128,7 +141,28 @@ function exit_fun() {
 	connection.close();
 }
 
+function mute_fun(){
 
+}
+function full_fun(){
+	debugger;
+	if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+  	} else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen(); 
+    }
+  }
+}
+function plus_fun(){
+
+}
+function share_fun(){
+
+}
+function minus_fun(){
+
+}
 // document.getElementById('btn-exit').onclick = function() {
      
 // 	if(connection.isInitiator){
@@ -168,11 +202,11 @@ function exit_fun() {
         localStream.stop();
     });
 	openButton.disabled = false;
+	$('.btnPanel').remove();
 	connection.close();
 }
 
-
-	// debugger;
+// debugger;
  //    if(!streamid) return;
 
 	// var streamEvent = {streamid:streamid};
