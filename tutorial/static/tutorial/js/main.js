@@ -24,15 +24,38 @@ var remoteVideo = document.getElementById('remote-video-container')
 
 var openButton= document.getElementById('btn-open-or-join')
 
+
+var exit_bt = document.getElementById('btn-exit');
+
+if (exit_bt != null){
+	exit_bt.style.display="none";
+}
 connection.onstream = function(event){
 
 	var video = event.mediaElement
 
+	// if (video.hasAttribute("controls")) {
+ //    	video.removeAttribute("controls");   
+ //  	}    
+
 	if(event.type==='local')
 	{
-		localVideo.appendChild(video)
+		var elementdiv = document.createElement("div");
+		elementdiv.classList.add("btnPanel");
+		var elementbt = document.createElement("button");
+		elementbt.setAttribute("id", "btn-exit");
+		var t = document.createTextNode("Exit");
+		elementbt.onclick = exit_fun
+		elementbt.appendChild(t);
+		localVideo.appendChild(elementdiv);
+		elementdiv.appendChild(elementbt);
+		localVideo.appendChild(video);
 		var localStream = connection.attachStreams[0];
-		localStream.mute('audio')
+		localStream.mute('audio');
+
+		if(exit_bt != null){
+			exit_bt.style.display="block";
+		}		
 		debugger;
 	}
 	if(event.type==='remote'){
@@ -53,7 +76,7 @@ connection.onstream = function(event){
 //     }
 // };
 
-debugger;
+
 room_id.value = connection.token()
 
 
@@ -62,7 +85,29 @@ document.getElementById('btn-open-or-join').onclick = function(){
 	connection.openOrJoin(room_id.value || 'predefined-roomid');
 }  
 
-document.getElementById('btn-exit').onclick  = function() {
+
+// document.getElementById('btn-exit').onclick  = function() {
+     
+// 	if(connection.isInitiator){
+// 		debugger;
+// 		var remotelist = connection.getRemoteStreams()
+		
+// 		remotelist.forEach(function(remoteStream) {
+// 			debugger;
+//         	remoteStream.stop();
+//         	connection.remove(remoteStream);
+//     	});
+
+// 	}
+
+// 	connection.attachStreams.forEach(function(localStream) {
+//         localStream.stop();
+//     });
+// 	openButton.disabled = false;
+// 	connection.close();
+// }
+
+function exit_fun() {
      
 	if(connection.isInitiator){
 		debugger;
@@ -81,6 +126,50 @@ document.getElementById('btn-exit').onclick  = function() {
     });
 	openButton.disabled = false;
 	connection.close();
+}
+
+
+// document.getElementById('btn-exit').onclick = function() {
+     
+// 	if(connection.isInitiator){
+// 		debugger;
+// 		var remotelist = connection.getRemoteStreams()
+		
+// 		remotelist.forEach(function(remoteStream) {
+// 			debugger;
+//         	remoteStream.stop();
+//         	connection.remove(remoteStream);
+//     	});
+
+// 	}
+
+// 	connection.attachStreams.forEach(function(localStream) {
+//         localStream.stop();
+//     });
+// 	openButton.disabled = false;
+// 	connection.close();
+// }
+
+function exit_fun() {
+     
+	if(connection.isInitiator){
+		debugger;
+		var remotelist = connection.getRemoteStreams()
+		
+		remotelist.forEach(function(remoteStream) {
+			debugger;
+        	remoteStream.stop();
+        	connection.remove(remoteStream);
+    	});
+
+	}
+
+	connection.attachStreams.forEach(function(localStream) {
+        localStream.stop();
+    });
+	openButton.disabled = false;
+	connection.close();
+}
 
 
 	// debugger;
@@ -91,15 +180,4 @@ document.getElementById('btn-exit').onclick  = function() {
  //      connection.onstreamended( streamEvent );
  // 	}
 
-};
 
-
-
-// panel for controls 
-/*.btnPanel{
-    position: fixed;
-    top: 316px;
-    width: 360px;
-    background-color: gray;
-    opacity: 0.7;
-}*/
