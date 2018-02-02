@@ -16,12 +16,19 @@ connection.sdpConstraints.mandatory = {
 
 var room_id = document.getElementById('roomid')
 
-var all_button =`<button id="btn-mute">mute</button>
-				<button id="btn-plus">plus</button>
-            	<button id="btn-minus">minus</button>
-           	 	<button id="btn-full">full</button>
-            	<button id="btn-share">share</button>
-            	<button id="btn-exit">ex</button>`
+var all_button =`<button class="btn-mute btn-success"><img class="img-icon" src="static/tutorial/images/mute.png"></button>
+				<button class="btn-plus btn-success"><img class="img-icon" src="static/tutorial/images/plus.png"></button>
+            	<button class="btn-minus btn-success"><img class="img-icon" src="static/tutorial/images/minus.png"></button>
+           	 	<button class="btn-full btn-success"><img class="img-icon" src="static/tutorial/images/fullscreen.png"></button>
+            	<button class="btn-share btn-success"><img class="img-icon" src="static/tutorial/images/share.png"></button>
+            	<button class="btn-exit btn-success"><img class="img-icon" src="static/tutorial/images/exit.png"></button>`
+
+var remote_button =`<button class="btn-mute btn-success btn-first"><img class="img-icon" src="static/tutorial/images/mute.png"></button>
+				<button class="btn-plus btn-success"><img class="img-icon" src="static/tutorial/images/plus.png"></button>
+            	<button class="btn-minus btn-success"><img class="img-icon" src="static/tutorial/images/minus.png"></button>
+           	 	<button class="btn-full btn-success"><img class="img-icon" src="static/tutorial/images/fullscreen.png"></button>
+            	`
+var video_panel = `<div class="full-width"></div>`
 
 //var close_room = document.getElementById('roomid')
 var streamid;
@@ -43,7 +50,7 @@ connection.onstream = function(event){
 
 	if(event.type==='local')
 	{
-		debugger;
+	
 		var i;
 		var elementdiv = document.createElement("div");
 		elementdiv.classList.add("btnPanel");
@@ -61,9 +68,40 @@ connection.onstream = function(event){
 	}
 	if(event.type==='remote'){
 
-		remoteVideo.appendChild(video)
+		
+		var i;
+		
+
+		// append div //
+		// html_video_container =  $.parseHTML(video_panel);
+		// for(i=0;i<html_video_container.length;i++){
+
+		// 	remoteVideo.appendchild(html_video_container[i])
+		// }
+
+		var html_video = document.createElement("div");
+		html_video.classList.add("full-width");
+		remoteVideo.appendChild(html_video);
+
+
+		debugger;
+		// it will create nave bar control append to nav bar
+		var elementdiv = document.createElement("div");
+		elementdiv.classList.add("btnPanel");
+		
+
+		html_video.appendChild(elementdiv);
+		html = $.parseHTML( remote_button );
+		for(i=0; i<html.length;i++){
+			elementdiv.appendChild(html[i]);
+		}
+
+		// append video div 
+		html_video.appendChild(video)
+		
 		var localStream = connection.attachStreams[0];
-		localStream.unmute('audio')
+		localStream.unmute('audio');
+		addButtonEvent();
 	}
 
 	streamid = event.streamid; 
@@ -110,58 +148,73 @@ document.getElementById('btn-open-or-join').onclick = function(){
 
 function addButtonEvent(){
 	debugger;
-	$("#btn-exit").on("click",exit_fun);
-	$("#btn-mute").on("click",mute_fun);
-	$("#btn-plus").on("click",plus_fun);
-	$("#btn-minus").on("click",minus_fun);
-	$("#btn-full").on("click",full_fun);
-	$("#btn-share").on("click",share_fun);
+	$(".btn-exit").on("click",exit_fun);
+	$(".btn-mute").on("click",mute_fun);
+	$(".btn-plus").on("click",plus_fun);
+	$(".btn-minus").on("click",minus_fun);
+	$(".btn-full").on("click",full_fun);
+	$(".btn-share").on("click",share_fun);
 }
 
 
 
-function exit_fun() {
+// function exit_fun() {
      
-	if(connection.isInitiator){
-		debugger;
-		var remotelist = connection.getRemoteStreams()
+// 	if(connection.isInitiator){
+// 		debugger;
+// 		var remotelist = connection.getRemoteStreams()
 		
-		remotelist.forEach(function(remoteStream) {
-			debugger;
-        	remoteStream.stop();
-        	connection.remove(remoteStream);
-    	});
+// 		remotelist.forEach(function(remoteStream) {
+// 			debugger;
+//         	remoteStream.stop();
+//         	connection.remove(remoteStream);
+//     	});
 
-	}
+// 	}
 
-	connection.attachStreams.forEach(function(localStream) {
-        localStream.stop();
-    });
-	openButton.disabled = false;
-	connection.close();
-}
+// 	connection.attachStreams.forEach(function(localStream) {
+//         localStream.stop();
+//     });
+// 	openButton.disabled = false;
+// 	connection.close();
+// }
 
 function mute_fun(){
-
+	debugger;
+	localStream = connection.streamEvents.selectFirst()
+	localStream.stream.mute('audio'); 
 }
 function full_fun(){
 	debugger;
-	if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
+	
+	video = this.parentNode.nextElementSibling; 
+
+	if (video.webkitRequestFullScreen) {
+      video.webkitRequestFullScreen();
   	} else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen(); 
+    if (video.webkitexitFullscreen) {
+      video.webkitexitFullscreen(); 
     }
   }
 }
 function plus_fun(){
+	debugger;
+	video = this.parentNode.nextElementSibling;
+
+	if(video.volume != 1.0){
+		video.volume= video.volume + 0.1;
+	}
 
 }
 function share_fun(){
 
 }
 function minus_fun(){
-
+	
+	video = this.parentNode.nextElementSibling;
+	if(video.volume != 0.0){
+		video.volume= video.volume - 0.1;
+	}
 }
 // document.getElementById('btn-exit').onclick = function() {
      
@@ -187,7 +240,7 @@ function minus_fun(){
 function exit_fun() {
      
 	if(connection.isInitiator){
-		debugger;
+		
 		var remotelist = connection.getRemoteStreams()
 		
 		remotelist.forEach(function(remoteStream) {
