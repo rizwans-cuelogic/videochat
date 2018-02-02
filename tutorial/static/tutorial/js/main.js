@@ -216,6 +216,7 @@ function minus_fun(){
 		video.volume= video.volume - 0.1;
 	}
 }
+
 // document.getElementById('btn-exit').onclick = function() {
      
 // 	if(connection.isInitiator){
@@ -238,7 +239,7 @@ function minus_fun(){
 // }
 
 function exit_fun() {
-     
+    debugger;
 	if(connection.isInitiator){
 		
 		var remotelist = connection.getRemoteStreams()
@@ -246,9 +247,7 @@ function exit_fun() {
 		remotelist.forEach(function(remoteStream) {
 			debugger;
         	remoteStream.stop();
-        	connection.remove(remoteStream);
-    	});
-
+    	});	
 	}
 
 	connection.attachStreams.forEach(function(localStream) {
