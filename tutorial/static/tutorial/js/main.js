@@ -1,5 +1,17 @@
 var connection = new RTCMultiConnection()
 
+connection.getScreenConstraints = function(callback) {
+	debugger;
+    getScreenConstraints(function(error, screen_constraints) {
+        if (!error) {
+            screen_constraints = connection.modifyScreenConstraints(screen_constraints);
+            callback(error, screen_constraints);
+            return;
+        }
+        throw error;
+    });
+};
+
 connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 
 connection.session = {
@@ -44,9 +56,27 @@ var exit_bt = document.getElementById('btn-exit');
 if (exit_bt != null){
 	exit_bt.style.display="none";
 }
+
+document.getElementById('share-screen').onclick = function() {
+				debugger;
+                this.disabled = true;
+                connection.addStream({
+                    screen: true,
+                    oneway: true
+                });
+            };
+
 connection.onstream = function(event){
+	debugger;	
+	 if(event.stream.isScreen === true) {
+                    width = connection.videosContainer.clientWidth - 20;
+               	var share=document.getElementById('screen-share');
+               	share.appendChild(event.mediaElement)	
+      }
 
 	var video = event.mediaElement
+
+
 
 	if(event.type==='local')
 	{

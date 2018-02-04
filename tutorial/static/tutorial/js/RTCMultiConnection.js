@@ -870,6 +870,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
     }
 
     function getScreenConstraints(callback, audioPlusTab) {
+        debugger;
         var firefoxScreenConstraints = {
             mozMediaSource: "window",
             mediaSource: "window"
