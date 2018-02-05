@@ -408,6 +408,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
     }
 
     function setMuteHandlers(connection, streamEvent) {
+        
         streamEvent.stream && streamEvent.stream && streamEvent.stream.addEventListener && (streamEvent.stream.addEventListener("mute", function(event) {
             event = connection.streamEvents[streamEvent.streamid], event.session = {
                 audio: "audio" === event.muteType,

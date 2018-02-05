@@ -181,8 +181,11 @@ function addButtonEvent(){
 
 function mute_fun(){
 	debugger;
-	localStream = connection.streamEvents.selectFirst()
-	localStream.stream.mute('audio'); 
+	// localStream = connection.streamEvents.selectFirst()
+	// localStream.stream.mute('audio');
+	video = this.parentNode.nextElementSibling;
+	connection.streamEvents[video.id].stream.mute('audio');
+
 }
 function full_fun(){
 	debugger;
@@ -198,11 +201,24 @@ function full_fun(){
   }
 }
 function plus_fun(){
-	debugger;
-	video = this.parentNode.nextElementSibling;
 
-	if(video.volume != 1.0){
+	debugger;
+
+	video = this.parentNode.nextElementSibling;
+	media_stream = connection.streamEvents[video.id].stream
+	audiotrack  = media_stream.getAudioTracks()[0]
+
+	if(audiotrack["enabled"] == false){
+
+		connection.streamEvents[video.id].stream.unmute('audio');
+		video.volume = 0.0
+	}
+
+	if((video.volume+0.1)<=1.0 ){
 		video.volume= video.volume + 0.1;
+	}
+	if((video.volume+0.1)>1.0 ){
+		video.volume= 1.0;
 	}
 
 }
@@ -211,9 +227,13 @@ function share_fun(){
 }
 function minus_fun(){
 	
+	debugger;
 	video = this.parentNode.nextElementSibling;
-	if(video.volume != 0.0){
+	if((video.volume-0.1)>=0.0 ){
 		video.volume= video.volume - 0.1;
+	}
+	if((video.volume-0.1)<0.0 ){
+		connection.streamEvents[video.id].stream.mute('audio');	
 	}
 }
 
