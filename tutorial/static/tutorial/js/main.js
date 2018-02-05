@@ -1,3 +1,14 @@
+document.getElementById('share-screen').onclick = function() {
+
+	debugger;
+	connection.session['screen']=true
+    this.disabled = true;
+    connection.addStream({
+        screen: true,
+        oneway: true
+    });
+};
+
 var connection = new RTCMultiConnection()
 
 connection.getScreenConstraints = function(callback) {
@@ -12,12 +23,13 @@ connection.getScreenConstraints = function(callback) {
     });
 };
 
+
 connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 
 connection.session = {
 
     'audio':true,
-    'video':true
+    'video':true,
 }
 
 connection.sdpConstraints.mandatory = {
@@ -57,21 +69,23 @@ if (exit_bt != null){
 	exit_bt.style.display="none";
 }
 
-document.getElementById('share-screen').onclick = function() {
-				debugger;
-                this.disabled = true;
-                connection.addStream({
-                    screen: true,
-                    oneway: true
-                });
-            };
 
 connection.onstream = function(event){
 	debugger;	
 	 if(event.stream.isScreen === true) {
-                    width = connection.videosContainer.clientWidth - 20;
+                width = connection.videosContainer.clientWidth - 20;
                	var share=document.getElementById('screen-share');
-               	share.appendChild(event.mediaElement)	
+               	// share.appendChild(event.mediaElement);
+
+                var mediaElement = getMediaElement(event.mediaElement, {
+                    title: event.userid,
+                    buttons: ['full-screen'],
+                    width: width,
+                    showOnMouseEnter: false
+                });
+                share.appendChild(event.mediaElement);
+                mediaElement.id = event.streamid;
+               	return;	
       }
 
 	var video = event.mediaElement
@@ -240,7 +254,7 @@ function share_fun(){
 
 }
 function minus_fun(){
-	
+	debugger;
 	video = this.parentNode.nextElementSibling;
 	if(video.volume != 0.0){
 		video.volume= video.volume - 0.1;
