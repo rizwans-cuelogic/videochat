@@ -1,171 +1,289 @@
-'use strict';
+var connection = new RTCMultiConnection()
 
-//var ws = new WebSocket('ws://' + window.location.host + window.location.pathname);
+connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 
-var channel = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
+connection.session = {
 
-var pub = 'pub-f986077a-73bd-4c28-8e50-2e44076a84e0';
-var sub = 'sub-b8f4c07a-352e-11e2-bb9d-c7df1d04ae4a';
+    'audio':true,
+    'video':true
+}
 
-WebSocket  = PUBNUB.ws;
+connection.sdpConstraints.mandatory = {
 
-var websocket = new WebSocket('wss://pubsub.pubnub.com/' + pub + '/' + sub + '/' + channel);
+    OfferToReceiveAudio:true,
+    OfferToReceiveVideo:true
+}
 
-websocket.onerror = function() {
-    //location.reload();
-};
+var room_id = document.getElementById('roomid')
 
-websocket.onclose = function() {
-    //location.reload();
-};
+var all_button =`<button class="btn-mute btn-success"><img class="img-icon" src="static/tutorial/images/mute.png"></button>
+				<button class="btn-plus btn-success"><img class="img-icon" src="static/tutorial/images/plus.png"></button>
+            	<button class="btn-minus btn-success"><img class="img-icon" src="static/tutorial/images/minus.png"></button>
+           	 	<button class="btn-full btn-success"><img class="img-icon" src="static/tutorial/images/fullscreen.png"></button>
+            	<button class="btn-share btn-success"><img class="img-icon" src="static/tutorial/images/share.png"></button>
+            	<button class="btn-exit btn-success"><img class="img-icon" src="static/tutorial/images/exit.png"></button>`
 
-websocket.push = websocket.send;
-websocket.send = function(data) {
-    websocket.push(JSON.stringify(data));
-};
+var remote_button =`<button class="btn-mute btn-success btn-first"><img class="img-icon" src="static/tutorial/images/mute.png"></button>
+				<button class="btn-plus btn-success"><img class="img-icon" src="static/tutorial/images/plus.png"></button>
+            	<button class="btn-minus btn-success"><img class="img-icon" src="static/tutorial/images/minus.png"></button>
+           	 	<button class="btn-full btn-success"><img class="img-icon" src="static/tutorial/images/fullscreen.png"></button>
+            	`
+var video_panel = `<div class="full-width"></div>`
 
-var peer = new PeerConnection(websocket);
-peer.onUserFound = function(userid) {
-    if (document.getElementById(userid)) return;
-    var tr = document.createElement('tr');
+//var close_room = document.getElementById('roomid')
+var streamid;
+var localVideo = document.getElementById('local-video-container')
 
-    var td1 = document.createElement('td');
-    var td2 = document.createElement('td');
+var remoteVideo = document.getElementById('remote-video-container')
 
-    td1.innerHTML = userid + ' has camera. Are you interested in video chat?';
+var openButton= document.getElementById('btn-open-or-join')
 
-    var button = document.createElement('button');
-    button.innerHTML = 'Join';
-    button.id = userid;
-    button.style.float = 'right';
-    button.onclick = function() {
-        button = this;
-        getUserMedia(function(stream) {
-            peer.addStream(stream);
-            peer.sendParticipationRequest(button.id);
-        });
-        button.disabled = true;
-    };
-    td2.appendChild(button);
 
-    tr.appendChild(td1);
-    tr.appendChild(td2);
-    roomsList.appendChild(tr);
-};
+var exit_bt = document.getElementById('btn-exit');
 
-peer.onStreamAdded = function(e) {
-    if (e.type == 'local') document.querySelector('#start-broadcasting').disabled = false;
-    var video = e.mediaElement;
+if (exit_bt != null){
+	exit_bt.style.display="none";
+}
+connection.onstream = function(event){
 
-    video.setAttribute('width', 600);
-    video.setAttribute('controls', true);
+	var video = event.mediaElement
 
-    videosContainer.insertBefore(video, videosContainer.firstChild);
+	if(event.type==='local')
+	{
+	
+		var i;
+		var elementdiv = document.createElement("div");
+		elementdiv.classList.add("btnPanel");
 
-    video.play();
-    rotateVideo(video);
-    scaleVideos();
-};
+		localVideo.appendChild(elementdiv);
+		html = $.parseHTML( all_button );
+		for(i=0; i<html.length;i++){
+			elementdiv.appendChild(html[i]);
+		}
+		localVideo.appendChild(video);
+		var localStream = connection.attachStreams[0];
+		localStream.mute('audio');
 
-peer.onStreamEnded = function(e) {
-    var video = e.mediaElement;
-    if (video) {
-        video.style.opacity = 0;
-        rotateVideo(video);
-        setTimeout(function() {
-            video.parentNode.removeChild(video);
-            scaleVideos();
-        }, 1000);
-    }
-};
+		addButtonEvent();
+	}
+	if(event.type==='remote'){
 
-document.querySelector('#start-broadcasting').onclick = function() {
+		
+		var i;
+		
+
+		// append div //
+		// html_video_container =  $.parseHTML(video_panel);
+		// for(i=0;i<html_video_container.length;i++){
+
+		// 	remoteVideo.appendchild(html_video_container[i])
+		// }
+
+		var html_video = document.createElement("div");
+		html_video.classList.add("full-width");
+		remoteVideo.appendChild(html_video);
+
+
+		debugger;
+		// it will create nave bar control append to nav bar
+		var elementdiv = document.createElement("div");
+		elementdiv.classList.add("btnPanel");
+		
+
+		html_video.appendChild(elementdiv);
+		html = $.parseHTML( remote_button );
+		for(i=0; i<html.length;i++){
+			elementdiv.appendChild(html[i]);
+		}
+
+		// append video div 
+		html_video.appendChild(video)
+		
+		var localStream = connection.attachStreams[0];
+		localStream.unmute('audio');
+		addButtonEvent();
+	}
+
+	streamid = event.streamid; 
+}
+
+// connection.onstreamended = function(event) {
+// 	debugger;
+//     var video = document.getElementById(event.streamid);
+//     if (video && video.parentNode) {
+//         video.parentNode.removeChild(video);
+//     }
+// };
+
+
+room_id.value = connection.token()
+
+
+document.getElementById('btn-open-or-join').onclick = function(){
     this.disabled = true;
-    getUserMedia(function(stream) {
-        peer.addStream(stream);
-        peer.startBroadcasting();
-    });
-};
+	connection.openOrJoin(room_id.value || 'predefined-roomid');
+}  
 
-document.querySelector('#your-name').onchange = function() {
-    peer.userid = this.value;
-};
 
-var videosContainer = document.getElementById('videos-container') || document.body;
-var btnSetupNewRoom = document.getElementById('setup-new-room');
-var roomsList = document.getElementById('rooms-list');
+// document.getElementById('btn-exit').onclick  = function() {
+     
+// 	if(connection.isInitiator){
+// 		debugger;
+// 		var remotelist = connection.getRemoteStreams()
+		
+// 		remotelist.forEach(function(remoteStream) {
+// 			debugger;
+//         	remoteStream.stop();
+//         	connection.remove(remoteStream);
+//     	});
 
-if (btnSetupNewRoom) btnSetupNewRoom.onclick = setupNewRoomButtonClickHandler;
+// 	}
 
-function rotateVideo(video) {
-    video.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(0deg)';
-    setTimeout(function() {
-        video.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(360deg)';
-    }, 1000);
+// 	connection.attachStreams.forEach(function(localStream) {
+//         localStream.stop();
+//     });
+// 	openButton.disabled = false;
+// 	connection.close();
+// }
+
+function addButtonEvent(){
+	debugger;
+	$(".btn-exit").on("click",exit_fun);
+	$(".btn-mute").on("click",mute_fun);
+	$(".btn-plus").on("click",plus_fun);
+	$(".btn-minus").on("click",minus_fun);
+	$(".btn-full").on("click",full_fun);
+	$(".btn-share").on("click",share_fun);
 }
 
-function scaleVideos() {
-    var videos = document.querySelectorAll('video'),
-        length = videos.length,
-        video;
 
-    var minus = 130;
-    var windowHeight = 700;
-    var windowWidth = 600;
-    var windowAspectRatio = windowWidth / windowHeight;
-    var videoAspectRatio = 4 / 3;
-    var blockAspectRatio;
-    var tempVideoWidth = 0;
-    var maxVideoWidth = 0;
 
-    for (var i = length; i > 0; i--) {
-        blockAspectRatio = i * videoAspectRatio / Math.ceil(length / i);
-        if (blockAspectRatio <= windowAspectRatio) {
-            tempVideoWidth = videoAspectRatio * windowHeight / Math.ceil(length / i);
-        } else {
-            tempVideoWidth = windowWidth / i;
-        }
-        if (tempVideoWidth > maxVideoWidth)
-            maxVideoWidth = tempVideoWidth;
+// function exit_fun() {
+     
+// 	if(connection.isInitiator){
+// 		debugger;
+// 		var remotelist = connection.getRemoteStreams()
+		
+// 		remotelist.forEach(function(remoteStream) {
+// 			debugger;
+//         	remoteStream.stop();
+//         	connection.remove(remoteStream);
+//     	});
+
+// 	}
+
+// 	connection.attachStreams.forEach(function(localStream) {
+//         localStream.stop();
+//     });
+// 	openButton.disabled = false;
+// 	connection.close();
+// }
+
+function mute_fun(){
+	debugger;
+	// localStream = connection.streamEvents.selectFirst()
+	// localStream.stream.mute('audio');
+	video = this.parentNode.nextElementSibling;
+	connection.streamEvents[video.id].stream.mute('audio');
+
+}
+function full_fun(){
+	debugger;
+	
+	video = this.parentNode.nextElementSibling; 
+
+	if (video.webkitRequestFullScreen) {
+      video.webkitRequestFullScreen();
+  	} else {
+    if (video.webkitexitFullscreen) {
+      video.webkitexitFullscreen(); 
     }
-    for (var i = 0; i < length; i++) {
-        video = videos[i];
-        if (video)
-            video.width = maxVideoWidth - minus;
-    }
+  }
+}
+function plus_fun(){
+
+	debugger;
+
+	video = this.parentNode.nextElementSibling;
+	media_stream = connection.streamEvents[video.id].stream
+	audiotrack  = media_stream.getAudioTracks()[0]
+
+	if(audiotrack["enabled"] == false){
+
+		connection.streamEvents[video.id].stream.unmute('audio');
+		video.volume = 0.0
+	}
+
+	if((video.volume+0.1)<=1.0 ){
+		video.volume= video.volume + 0.1;
+	}
+	if((video.volume+0.1)>1.0 ){
+		video.volume= 1.0;
+	}
+
+}
+function share_fun(){
+
+}
+function minus_fun(){
+	
+	debugger;
+	video = this.parentNode.nextElementSibling;
+	if((video.volume-0.1)>=0.0 ){
+		video.volume= video.volume - 0.1;
+	}
+	if((video.volume-0.1)<0.0 ){
+		connection.streamEvents[video.id].stream.mute('audio');	
+	}
 }
 
-window.onresize = scaleVideos;
+// document.getElementById('btn-exit').onclick = function() {
+     
+// 	if(connection.isInitiator){
+// 		debugger;
+// 		var remotelist = connection.getRemoteStreams()
+		
+// 		remotelist.forEach(function(remoteStream) {
+// 			debugger;
+//         	remoteStream.stop();
+//         	connection.remove(remoteStream);
+//     	});
 
-// you need to capture getUserMedia yourself!
-function getUserMedia(callback) {
-    var hints = {
-        audio: true,
-        video: {
-            optional: [],
-            mandatory: {}
-        }
-    };
-    navigator.getUserMedia(hints, function(stream) {
-        var video = document.createElement('video');
-        video.src = URL.createObjectURL(stream);
-        video.controls = true;
-        video.muted = true;
+// 	}
 
-        peer.onStreamAdded({
-            mediaElement: video,
-            userid: 'self',
-            stream: stream
-        });
+// 	connection.attachStreams.forEach(function(localStream) {
+//         localStream.stop();
+//     });
+// 	openButton.disabled = false;
+// 	connection.close();
+// }
 
-        callback(stream);
+function exit_fun() {
+    debugger;
+	if(connection.isInitiator){
+		
+		var remotelist = connection.getRemoteStreams()
+		
+		remotelist.forEach(function(remoteStream) {
+			debugger;
+        	remoteStream.stop();
+    	});	
+	}
+
+	connection.attachStreams.forEach(function(localStream) {
+        localStream.stop();
     });
+	openButton.disabled = false;
+	$('.btnPanel').remove();
+	connection.close();
 }
 
-(function() {
-    var uniqueToken = document.getElementById('unique-token');
-    if (uniqueToken)
-        if (location.hash.length > 2) uniqueToken.parentNode.parentNode.parentNode.innerHTML = '<h2 style="text-align:center;"><a href="' + location.href + '" target="_blank">Share this link</a></h2>';
-        else uniqueToken.innerHTML = uniqueToken.parentNode.parentNode.href = '#' + (Math.random() * new Date().getTime()).toString(36).toUpperCase().replace(/\./g, '-');
-})();
-      
+// debugger;
+ //    if(!streamid) return;
+
+	// var streamEvent = {streamid:streamid};
+ // 	if(streamEvent) {
+ //      connection.onstreamended( streamEvent );
+ // 	}
+
+

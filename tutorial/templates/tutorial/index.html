@@ -1,47 +1,46 @@
 {% load static %}
 <head>
-<title>WebSockets | WebRTC One-to-One Video Chat</title>
-
-        <script>
-            if(!location.hash.replace('#', '').length) {
-                location.href = location.href.split('#')[0] + '#' + (Math.random() * 100).toString().replace('.', '');
-                location.reload();
-            }
-        </script>
+    <title>WebSockets | WebRTC Many-to-Many Video Conferencing</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="stylesheet" type="text/css" href="{% static 'tutorial/bootstrap-3.3.7-dist/css/bootstrap.min.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'tutorial/bootstrap-3.3.7-dist/css/bootstrap-theme.min.css' %}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
+    <link rel="stylesheet" href="{% static 'tutorial/css/main.css' %}">
+	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="{% static 'tutorial/testjs/RTCMultiConnection.js' %}"></script>
+    <script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
+    <style>
         
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-        <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
-        <meta name="author" content="Muaz Khan">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
-		
-        <!-- scripts used for peers connection -->
-        <script src="https://cdn.webrtc-experiment.com/websocket/PeerConnection.js"> </script>
-        <script src="https://cdn.webrtc-experiment.com/view/websocket.js"> </script>
-
+    </style>
 </head>
 
 <body>
-
-	<!-- <a href="{% url 'createroom' %}">Join room</a> -->
-
-	<section class="experiment">
-                <section>
-		          	<span>
-		             <a href="/websocket/" target="_blank" title="Setup Private Room!"><code><strong id="unique-token">#123456789</strong></code></a>
-		           </span>
-            		<input type="text" id="your-name" placeholder="your-name">
-            		<button id="start-broadcasting" class="setup">Join</button>
-                </section>
-
-                <!-- list of all available conferencing rooms -->
-                <table id="rooms-list" style="width: 100%;"></table>
-
-                <!-- local/remote videos container -->
-                <div id="videos-container"></div>
-    </section>
-
-	<script type="text/javascript" src="{% static 'tutorial/js/main.js' %}"></script>
+    <div class="container">
+        <h1>Here</h1>
+        <div class="row">
+            <h3 class="lead text-center">Video Conferencing</h3>
+            <div class="col-md-offset-3 col-md-4">
+        	   <div class="from-group">
+                <input class="form-control" type="text" id="roomid" placeholder="Unique room id">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-success" id="btn-open-or-join">open or join room</a>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div id="local-video-container"></div>
+        </div>   
+        <hr>
+        <div class="row">
+            <div id="remote-video-container"></div> 
+        </div>
+    </div>
+	<script type="text/javascript" src="{% static 'tutorial/testjs/main.js' %}"></script>
 </body>
