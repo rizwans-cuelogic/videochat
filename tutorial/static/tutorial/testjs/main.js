@@ -53,7 +53,7 @@ connection.onstream = function(event){
 
     if(event.stream.isScreen === true && connection.isInitiator==true) {
             width = connection.videosContainer.clientWidth - 20;
-            var share=document.getElementById('screen-share');
+            var share=document.getElementById('screen-local');
             share.appendChild(event.mediaElement);
 
             // var mediaElement = getMediaElement(event.mediaElement, {
@@ -68,7 +68,7 @@ connection.onstream = function(event){
      }
      if(event.stream.isScreen== true && event.type=="remote" && connection.isInitiator == false){
 
-            var remote_share=document.getElementById('screen-share');
+            var remote_share=document.getElementById('screen-remote');
             remote_share.appendChild(event.mediaElement);
             return;
 
