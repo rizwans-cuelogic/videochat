@@ -50,6 +50,34 @@ var remoteVideo = document.getElementById('remote-video-container');
 var openButton= document.getElementById('btn-open-or-join');
 
 connection.onstream = function(event){
+
+    if(event.stream.isScreen === true && connection.isInitiator==true) {
+            width = connection.videosContainer.clientWidth - 20;
+            var share=document.getElementById('screen-share');
+            share.appendChild(event.mediaElement);
+
+            // var mediaElement = getMediaElement(event.mediaElement, {
+            //     title: event.userid,
+            //     buttons: ['full-screen'],
+            //     width: width,
+            //     showOnMouseEnter: false
+            // });
+            share.appendChild(event.mediaElement);
+            mediaElement.id = event.streamid;
+            return; 
+     }
+     if(event.stream.isScreen== true && event.type=="remote" && connection.isInitiator == false){
+
+            var remote_share=document.getElementById('screen-share');
+            remote_share.appendChild(event.mediaElement);
+            return;
+
+    }
+
+    if(event.stream.isScreen==true && connection.isInitiator==false && event.type=='local'){
+
+        return;
+    }
     var video = event.mediaElement;
     if(event.type === 'local'){
         var i;
@@ -94,7 +122,6 @@ connection.onEntireSessionClosed = function(event) {
     connection.attachStreams.forEach(function(stream) {
         stream.stop();
     });
-    document.querySelector('h1').innerHTML = 'Entire session has been closed by the moderator: ' + event.userid;
 };
 
 connection.onstreamended = function(e) {
@@ -179,3 +206,25 @@ function exit_fun() {
         });
     }
 }
+
+function share_fun(){
+    
+    connection.session['screen']=true
+    this.disabled = true;
+    connection.addStream({
+        screen: true,
+        oneway: true
+    });
+}
+
+connection.getScreenConstraints = function(callback) {
+    debugger;
+    getScreenConstraints(function(error, screen_constraints) {
+        if (!error) {
+            screen_constraints = connection.modifyScreenConstraints(screen_constraints);
+            callback(error, screen_constraints);
+            return;
+        }
+        throw error;
+    });
+};
