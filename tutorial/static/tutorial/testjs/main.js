@@ -21,12 +21,12 @@ connection.sdpConstraints.mandatory = {
 // ......................................................
 // TODO : Manage from backend
 var room_id = document.getElementById('roomid');
-if (localStorage.getItem('room_id')) {
-    room_id.value = localStorage.getItem('room_id');
-} else {
+// if (localStorage.getItem('room_id')) {
+//     room_id.value = localStorage.getItem('room_id');
+// } else {
     room_id.value = connection.token();
-    localStorage.setItem('room_id', room_id.value);
-}
+    // localStorage.setItem('room_id', room_id.value);
+// }
 document.getElementById('btn-open-or-join').onclick = function(){
     this.disabled = true;
     connection.openOrJoin(room_id.value || 'predefined-roomid');
@@ -52,24 +52,30 @@ var openButton= document.getElementById('btn-open-or-join');
 connection.onstream = function(event){
 
     if(event.stream.isScreen === true && connection.isInitiator==true) {
-            width = connection.videosContainer.clientWidth - 20;
+        width = connection.videosContainer.clientWidth - 120;
             var share=document.getElementById('screen-local');
-            share.appendChild(event.mediaElement);
-
-            // var mediaElement = getMediaElement(event.mediaElement, {
-            //     title: event.userid,
-            //     buttons: ['full-screen'],
-            //     width: width,
-            //     showOnMouseEnter: false
-            // });
-            share.appendChild(event.mediaElement);
+            //share.appendChild(event.mediaElement);
+            var mediaElement = getMediaElement(event.mediaElement, {
+                title: event.userid,
+                buttons: ['full-screen'],
+                width: width,
+                showOnMouseEnter: false
+            });
+            share.appendChild(mediaElement);
             mediaElement.id = event.streamid;
-            return; 
-     }
+        return; 
+    }
      if(event.stream.isScreen== true && event.type=="remote" && connection.isInitiator == false){
 
             var remote_share=document.getElementById('screen-remote');
-            remote_share.appendChild(event.mediaElement);
+            var mediaElement = getMediaElement(event.mediaElement, {
+                title: event.userid,
+                buttons: ['full-screen'],
+                width: width,
+                showOnMouseEnter: false
+            });
+            remote_share.appendChild(mediaElement);
+            //remote_share.appendChild(event.mediaElement);
             return;
 
     }
@@ -139,11 +145,18 @@ connection.onstreamended = function(e) {
 // ......................Custom Functions................
 // ......................................................
 function addButtonEvent(){
+    
+    $(".btn-exit").off("click");    
     $(".btn-exit").on("click",exit_fun);
+    $(".btn-mute").off("click");
     $(".btn-mute").on("click",mute_fun);
+    $(".btn-plus").off("click");
     $(".btn-plus").on("click",plus_fun);
+    $(".btn-minus").off("click");
     $(".btn-minus").on("click",minus_fun);
+    $(".btn-full").off("click");
     $(".btn-full").on("click",full_fun);
+    $(".btn-share").off("click");
     $(".btn-share").on("click",share_fun);
 }
 
