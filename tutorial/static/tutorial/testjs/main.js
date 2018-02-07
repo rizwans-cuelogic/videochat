@@ -208,8 +208,7 @@ function exit_fun() {
 }
 
 function share_fun(){
-    
-    connection.session['screen']=true
+
     this.disabled = true;
     connection.addStream({
         screen: true,
@@ -217,6 +216,16 @@ function share_fun(){
     });
 }
 
+// document.getElementsByClassName('btn-share')[0].onclick = function() {
+
+//     debugger;
+//     connection.session['screen']=true
+//     this.disabled = true;
+//     connection.addStream({
+//         screen: true,
+//         oneway: true
+//     });
+// };
 connection.getScreenConstraints = function(callback) {
     debugger;
     getScreenConstraints(function(error, screen_constraints) {
