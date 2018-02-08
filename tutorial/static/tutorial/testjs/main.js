@@ -39,7 +39,9 @@ document.getElementById('btn-open-or-join').onclick = function(){
 var common_button =`<button class="btn-mute btn-success"><img class="img-icon" src="static/tutorial/images/mute.png"></button>
                 <button class="btn-plus btn-success"><img class="img-icon" src="static/tutorial/images/plus.png"></button>
                 <button class="btn-minus btn-success"><img class="img-icon" src="static/tutorial/images/minus.png"></button>
-                <button class="btn-full btn-success"><img class="img-icon" src="static/tutorial/images/fullscreen.png"></button>`
+                <button class="btn-full btn-success"><img class="img-icon" src="static/tutorial/images/fullscreen.png"></button>
+                <button class="btn-recording">Start</button>
+                <button class="btn-stop-recodring">stop</button>`
 
 var owner_button =`<button class="btn-share btn-success"><img class="img-icon" src="static/tutorial/images/share.png"></button>
                     <button class="btn-exit btn-success"><img class="img-icon" src="static/tutorial/images/exit.png"></button>`
@@ -50,27 +52,31 @@ var remoteVideo = document.getElementById('remote-video-container');
 var openButton= document.getElementById('btn-open-or-join');
 
 connection.onstream = function(event){
-
+    debugger;
     if(event.stream.isScreen === true && connection.isInitiator==true) {
-        width = connection.videosContainer.clientWidth - 120;
-            var share=document.getElementById('screen-local');
-            //share.appendChild(event.mediaElement);
-            var mediaElement = getMediaElement(event.mediaElement, {
-                title: event.userid,
-                buttons: ['full-screen'],
-                width: width,
-                showOnMouseEnter: false
-            });
-            share.appendChild(mediaElement);
-            mediaElement.id = event.streamid;
+        // width = connection.videosContainer.clientWidth - 120;
+        //     var share=document.getElementById('screen-local');
+        //     //share.appendChild(event.mediaElement);
+        //     var mediaElement = getMediaElement(event.mediaElement, {
+        //         title: event.userid,
+        //         buttons: ['full-screen'],
+        //         width: width,
+        //         showOnMouseEnter: false
+        //     });
+        //     share.appendChild(mediaElement);
+        //     mediaElement.id = event.streamid;
         return; 
     }
      if(event.stream.isScreen== true && event.type=="remote" && connection.isInitiator == false){
-
+            debugger;
+            width = connection.videosContainer.clientWidth - 120;
             var remote_share=document.getElementById('screen-remote');
             var mediaElement = getMediaElement(event.mediaElement, {
                 title: event.userid,
-                buttons: ['full-screen'],
+                buttons: ['full-screen','mute-audio',
+                          'take-snapshot',
+                           'record-audio',
+                           'record-video','volume-slider','stop'],
                 width: width,
                 showOnMouseEnter: false
             });
@@ -158,6 +164,11 @@ function addButtonEvent(){
     $(".btn-full").on("click",full_fun);
     $(".btn-share").off("click");
     $(".btn-share").on("click",share_fun);
+    $(".btn-recording").off("click");
+    $(".btn-recording").on("click",record_fun);
+    $(".btn-stop-recodring").off("click");
+    $(".btn-stop-recodring").on("click",stop_record_fun);
+
 }
 
 function mute_fun(){
@@ -239,6 +250,29 @@ function share_fun(){
 //         oneway: true
 //     });
 // };
+
+function record_fun(){
+    debugger;
+    video = this.parentNode.nextElementSibling;
+    id = connection.streamEvents[video.id].stream.id
+
+    connection.streams[id].startRecording({
+        audio: true,
+        video: true
+    });
+
+}
+
+function record_stop_fun(){
+
+    video = this.parentNode.nextElementSibling;
+   connection.streams[video.id].stopRecording(function (blob) {
+    // POST both audio/video "Blobs" to PHP/other server using single FormData/XHR2
+    // blob.audio  --- audio blob
+    // blob.video  --- video blob
+    debugger;
+}, {audio:true, video:true} );
+}
 connection.getScreenConstraints = function(callback) {
     debugger;
     getScreenConstraints(function(error, screen_constraints) {

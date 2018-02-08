@@ -1398,6 +1398,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
         // via: https://github.com/diafygi/webrtc-ips
         function DetectLocalIPAddress(callback) {
+            // it detects local adress.
             if (!DetectRTC.isWebRTCSupported) {
                 return;
             }

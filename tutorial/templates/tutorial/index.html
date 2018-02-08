@@ -14,8 +14,9 @@
 	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
     <script src="{% static 'tutorial/testjs/RTCMultiConnection.js' %}"></script>
     <script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
-    <script src="https://cdn.webrtc-experiment.com/getMediaElement.js"></script>
-    <script src="https://cdn.webrtc-experiment.com:443/getScreenId.js"></script>
+    <script src="{% static 'tutorial/testjs/getMediaElement.js' %}"></script>
+    <script src="{% static 'tutorial/testjs/getScreenId.js' %}"></script>
+    <script src="https://github.com/muaz-khan/RecordRTC/releases/download/5.4.5/RecordRTC.js"></script>
 </head>
 
 <body>
@@ -34,7 +35,7 @@
         
         <div class="row">
             <div id="local-video-container"></div>
-            <div id="screen-local"></div>
+            <!-- <div id="screen-local"></div> -->
             <div id="screen-remote"></div>
         </div>   
         <hr>
