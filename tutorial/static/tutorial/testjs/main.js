@@ -2,6 +2,7 @@
 // ..................RTCMultiConnection Code.............
 // ......................................................
 var connection = new RTCMultiConnection();
+var recordRTC;
 
 // socket.io server
 connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
@@ -254,24 +255,44 @@ function share_fun(){
 function record_fun(){
     debugger;
     video = this.parentNode.nextElementSibling;
-    id = connection.streamEvents[video.id].stream.id
+    //id = connection.streamEvents[video.id].stream.id
+    stream = connection.streamEvents[video.id].stream
 
-    connection.streams[id].startRecording({
-        audio: true,
-        video: true
-    });
+    // connection.streams[id].startRecording({
+    //     audio: true,
+    //     video: true
+    // });
+
+    var options = {
+        mimeType: 'video/webm', // or video/webm\;codecs=h264 or video/webm\;codecs=vp9
+        audioBitsPerSecond: 128000,
+        videoBitsPerSecond: 128000,
+        bitsPerSecond: 128000 // if this line is provided, skip above two
+    };
+
+    recordRTC = RecordRTC(stream, options);
+    recordRTC.startRecording();
+
 
 }
 
-function record_stop_fun(){
+function stop_record_fun(){
 
-    video = this.parentNode.nextElementSibling;
-   connection.streams[video.id].stopRecording(function (blob) {
-    // POST both audio/video "Blobs" to PHP/other server using single FormData/XHR2
-    // blob.audio  --- audio blob
-    // blob.video  --- video blob
+//     video = this.parentNode.nextElementSibling;
+//    connection.streams[video.id].stopRecording(function (blob) {
+//     // POST both audio/video "Blobs" to PHP/other server using single FormData/XHR2
+//     // blob.audio  --- audio blob
+//     // blob.video  --- video blob
+//     debugger;
+// }, {audio:true, video:true} );
+
+    var video =  document.getElementById('recording');
     debugger;
-}, {audio:true, video:true} );
+    recordRTC.stopRecording(function () {
+        var recordedBlob = recordRTC.getBlob();
+        var url = URL.createObjectURL(recordedBlob);
+        recordRTC.getDataURL(function(dataURL) { window.open(dataURL); });
+    });
 }
 connection.getScreenConstraints = function(callback) {
     debugger;
