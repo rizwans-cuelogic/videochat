@@ -3,7 +3,7 @@
 // ......................................................
 var connection = new RTCMultiConnection();
 var recordRTC;
-
+var initiator_stream ;
 // socket.io server
 connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 
@@ -41,8 +41,7 @@ var common_button =`<button class="btn-mute btn-success"><img class="img-icon" s
                 <button class="btn-plus btn-success"><img class="img-icon" src="static/tutorial/images/plus.png"></button>
                 <button class="btn-minus btn-success"><img class="img-icon" src="static/tutorial/images/minus.png"></button>
                 <button class="btn-full btn-success"><img class="img-icon" src="static/tutorial/images/fullscreen.png"></button>
-                <button class="btn-recording">Start</button>
-                <button class="btn-stop-recodring">stop</button>`
+            `
 
 var owner_button =`<button class="btn-share btn-success"><img class="img-icon" src="static/tutorial/images/share.png"></button>
                     <button class="btn-exit btn-success"><img class="img-icon" src="static/tutorial/images/exit.png"></button>`
@@ -54,6 +53,10 @@ var openButton= document.getElementById('btn-open-or-join');
 
 connection.onstream = function(event){
     debugger;
+    if(connection.isInitiator == true){
+        $(".btn-recording").attr("id",event.stream.id);
+
+    }
     if(event.stream.isScreen === true && connection.isInitiator==true) {
         // width = connection.videosContainer.clientWidth - 120;
         //     var share=document.getElementById('screen-local');
@@ -220,7 +223,7 @@ function minus_fun(){
 function exit_fun() {
     if (connection.isInitiator) {
         connection.closeEntireSession(function() {
-            document.querySelector('h1').innerHTML = 'Entire session has been closed.';
+            
             // TODO : Correct this code line for remove
             $('.btnPanel').remove();
         });
@@ -254,10 +257,12 @@ function share_fun(){
 
 function record_fun(){
     debugger;
-    video = this.parentNode.nextElementSibling;
+    //video = this.parentNode.nextElementSibling;
     //id = connection.streamEvents[video.id].stream.id
-    stream = connection.streamEvents[video.id].stream
-
+    
+    stream_id = this.id
+    //stream = connection.streamEvents[video.id].stream
+    stream = connection.streamEvents[stream_id].stream
     // connection.streams[id].startRecording({
     //     audio: true,
     //     video: true
@@ -265,8 +270,8 @@ function record_fun(){
 
     var options = {
         mimeType: 'video/webm', // or video/webm\;codecs=h264 or video/webm\;codecs=vp9
-        audioBitsPerSecond: 128000,
-        videoBitsPerSecond: 128000,
+        // audioBitsPerSecond: 128000,
+        // videoBitsPerSecond: 128000,
         bitsPerSecond: 128000 // if this line is provided, skip above two
     };
 
@@ -287,11 +292,16 @@ function stop_record_fun(){
 // }, {audio:true, video:true} );
 
     var video =  document.getElementById('recording');
-    debugger;
     recordRTC.stopRecording(function () {
+        debugger;
         var recordedBlob = recordRTC.getBlob();
         var url = URL.createObjectURL(recordedBlob);
-        recordRTC.getDataURL(function(dataURL) { window.open(dataURL); });
+        // video.src = url;
+        convertStreams(recordedBlob);
+        //window.open(url);
+
+
+        // recordRTC.getDataURL(function(dataURL) { window.open(dataURL); });
     });
 }
 connection.getScreenConstraints = function(callback) {
@@ -304,4 +314,98 @@ connection.getScreenConstraints = function(callback) {
         }
         throw error;
     });
+};
+
+var workerPath = 'https://archive.org/download/ffmpeg_asm/ffmpeg_asm.js';
+if(document.domain == 'localhost') {
+    workerPath = location.href.replace(location.href.split('/').pop(), '') + 'ffmpeg_asm.js';
+}
+function processInWebWorker() {
+    var blob = URL.createObjectURL(new Blob(['importScripts("' + workerPath + '");var now = Date.now;function print(text) {postMessage({"type" : "stdout","data" : text});};onmessage = function(event) {var message = event.data;if (message.type === "command") {var Module = {print: print,printErr: print,files: message.files || [],arguments: message.arguments || [],TOTAL_MEMORY: message.TOTAL_MEMORY || false};postMessage({"type" : "start","data" : Module.arguments.join(" ")});postMessage({"type" : "stdout","data" : "Received command: " +Module.arguments.join(" ") +((Module.TOTAL_MEMORY) ? ".  Processing with " + Module.TOTAL_MEMORY + " bits." : "")});var time = now();var result = ffmpeg_run(Module);var totalTime = now() - time;postMessage({"type" : "stdout","data" : "Finished processing (took " + totalTime + "ms)"});postMessage({"type" : "done","data" : result,"time" : totalTime});}};postMessage({"type" : "ready"});'], {
+        type: 'application/javascript'
+    }));
+    var worker = new Worker(blob);
+    URL.revokeObjectURL(blob);
+    return worker;
+}
+var worker;
+
+function convertStreams(videoBlob) {
+    var aab;
+    var buffersReady;
+    var workerReady;
+    var posted;
+    var fileReader = new FileReader();
+    fileReader.onload = function() {
+        aab = this.result;
+        postMessage();
+    };
+    fileReader.readAsArrayBuffer(videoBlob);
+    if (!worker) {
+        worker = processInWebWorker();
+    }
+    worker.onmessage = function(event) {
+        var message = event.data;
+        if (message.type == "ready") {
+            log('<a href="'+ workerPath +'" download="ffmpeg-asm.js">ffmpeg-asm.js</a> file has been loaded.');
+            workerReady = true;
+            if (buffersReady)
+                postMessage();
+        } else if (message.type == "stdout") {
+            log(message.data);
+        } else if (message.type == "start") {
+            log('<a href="'+ workerPath +'" download="ffmpeg-asm.js">ffmpeg-asm.js</a> file received ffmpeg command.');
+        } else if (message.type == "done") {
+            log(JSON.stringify(message));
+            var result = message.data[0];
+            log(JSON.stringify(result));
+            var blob = new File([result.data], 'test.mp4', {
+                type: 'video/mp4'
+            });
+            log(JSON.stringify(blob));
+            PostBlob(blob);
+        }
+    };
+    var postMessage = function() {
+        posted = true;
+        worker.postMessage({
+            type: 'command',
+            arguments: '-i video.webm -c:v mpeg4 -b:v 6400k -strict experimental output.mp4'.split(' '),
+            files: [
+                {
+                    data: new Uint8Array(aab),
+                    name: 'video.webm'
+                }
+            ]
+        });
+    };
+}
+function PostBlob(blob) {
+
+    var inner = document.querySelector('.inner');
+    var video = document.createElement('video');
+    video.controls = true;
+    var source = document.createElement('source');
+    source.src = URL.createObjectURL(blob);
+    source.type = 'video/mp4; codecs=mpeg4';
+    video.appendChild(source);
+    video.download = 'Play mp4 in VLC Player.mp4';
+    inner.appendChild(document.createElement('hr'));
+    var h3 = document.createElement('h3');
+    h3.innerHTML = '<a href="' + source.src + '" target="_blank" download="Play mp4 in VLC Player.mp4">Download Converted mp4</a>';
+    inner.appendChild(h3);
+    h3.style.display = 'block';
+    inner.appendChild(video);
+}
+var logsPreview = document.getElementById('logs-preview');
+function log(message) {
+    // var li = document.createElement('li');
+    // li.innerHTML = message;
+    // logsPreview.appendChild(li);
+    // li.tabIndex = 0;
+    // li.focus();
+    console.log(message);
+}
+window.onbeforeunload = function() {
+    document.querySelector('#record-video').disabled = false;
 };
