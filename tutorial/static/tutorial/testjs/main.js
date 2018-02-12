@@ -42,9 +42,11 @@ var common_button =`<button class="btn-mute btn-success"><img class="img-icon" s
                 <button class="btn-minus btn-success"><img class="img-icon" src="static/tutorial/images/minus.png"></button>
                 <button class="btn-full btn-success"><img class="img-icon" src="static/tutorial/images/fullscreen.png"></button>
             `
-
 var owner_button =`<button class="btn-share btn-success"><img class="img-icon" src="static/tutorial/images/share.png"></button>
                     <button class="btn-exit btn-success"><img class="img-icon" src="static/tutorial/images/exit.png"></button>`
+
+//<button class="btn-recording btn-succss">record</button>
+//<button class="btn-stop-recodring btn-succss">stop record</button>
 
 var streamid;
 var localVideo = document.getElementById('local-video-container');
@@ -257,12 +259,27 @@ function share_fun(){
 
 function record_fun(){
     debugger;
-    //video = this.parentNode.nextElementSibling;
-    //id = connection.streamEvents[video.id].stream.id
+    // video = this.parentNode.nextElementSibling;
+    // id = connection.streamEvents[video.id].stream.id
+    // stream = connection.streamEvents[video.id].stream
     
-    stream_id = this.id
-    //stream = connection.streamEvents[video.id].stream
-    stream = connection.streamEvents[stream_id].stream
+
+    var i;
+    stream = connection.peers[connection.sessionid].streams[0]
+    for(i=0;i<connection.getRemoteStreams().length;i++){
+        if(stream == connection.getRemoteStreams()[i]){
+            stream = connection.getRemoteStreams()[i];
+            break;
+        }
+    }
+
+
+    if(stream == undefined){
+        console.log("stream is undefined")
+    }
+
+    
+    //stream = connection.streamEvents[stream_id].stream
     // connection.streams[id].startRecording({
     //     audio: true,
     //     video: true
@@ -298,7 +315,7 @@ function stop_record_fun(){
         var url = URL.createObjectURL(recordedBlob);
         // video.src = url;
         convertStreams(recordedBlob);
-        //window.open(url);
+        window.open(url);
 
 
         // recordRTC.getDataURL(function(dataURL) { window.open(dataURL); });
@@ -315,12 +332,13 @@ connection.getScreenConstraints = function(callback) {
         throw error;
     });
 };
-
+debugger;
 var workerPath = 'https://archive.org/download/ffmpeg_asm/ffmpeg_asm.js';
 if(document.domain == 'localhost') {
     workerPath = location.href.replace(location.href.split('/').pop(), '') + 'ffmpeg_asm.js';
 }
 function processInWebWorker() {
+    debugger;
     var blob = URL.createObjectURL(new Blob(['importScripts("' + workerPath + '");var now = Date.now;function print(text) {postMessage({"type" : "stdout","data" : text});};onmessage = function(event) {var message = event.data;if (message.type === "command") {var Module = {print: print,printErr: print,files: message.files || [],arguments: message.arguments || [],TOTAL_MEMORY: message.TOTAL_MEMORY || false};postMessage({"type" : "start","data" : Module.arguments.join(" ")});postMessage({"type" : "stdout","data" : "Received command: " +Module.arguments.join(" ") +((Module.TOTAL_MEMORY) ? ".  Processing with " + Module.TOTAL_MEMORY + " bits." : "")});var time = now();var result = ffmpeg_run(Module);var totalTime = now() - time;postMessage({"type" : "stdout","data" : "Finished processing (took " + totalTime + "ms)"});postMessage({"type" : "done","data" : result,"time" : totalTime});}};postMessage({"type" : "ready"});'], {
         type: 'application/javascript'
     }));
