@@ -30,6 +30,7 @@ var room_id = document.getElementById('roomid');
 // }
 document.getElementById('btn-open-or-join').onclick = function(){
     this.disabled = true;
+    $('#roomid').prop('disabled',true);
     connection.openOrJoin(room_id.value || 'predefined-roomid');
 }
 
@@ -45,6 +46,10 @@ var common_button =`<button class="btn-mute btn-success"><img class="img-icon" s
 var owner_button =`<button class="btn-share btn-success"><img class="img-icon" src="static/tutorial/images/share.png"></button>
                     <button class="btn-exit btn-success"><img class="img-icon" src="static/tutorial/images/exit.png"></button>`
 
+var recording_button = `<button class="btn btn-success btn-recording">Start</button>
+                        <button class="btn btn-success btn-stop-recodring">Stop</button>`
+
+
 //<button class="btn-recording btn-succss">record</button>
 //<button class="btn-stop-recodring btn-succss">stop record</button>
 
@@ -55,10 +60,6 @@ var openButton= document.getElementById('btn-open-or-join');
 
 connection.onstream = function(event){
     debugger;
-    if(connection.isInitiator == true){
-        $(".btn-recording").attr("id",event.stream.id);
-
-    }
     if(event.stream.isScreen === true && connection.isInitiator==true) {
         // width = connection.videosContainer.clientWidth - 120;
         //     var share=document.getElementById('screen-local');
@@ -103,15 +104,16 @@ connection.onstream = function(event){
         html_video.classList.add("full-width");
         localVideo.appendChild(html_video);
 
+        
         var elementdiv = document.createElement("div");
         elementdiv.classList.add("btnPanel");
         html_video.appendChild(elementdiv);
-
-        $(localVideo).find('.btnPanel').html(common_button+owner_button);
+        var selector = $(localVideo).find('.btnPanel');
+        selector.html(common_button+owner_button);
         html_video.appendChild(video);
         var localStream = connection.attachStreams[0];
         localStream.mute('audio');
-        addButtonEvent();
+        addButtonEvent(selector);
     }
     else if(event.type === 'remote'){
         var i;
@@ -122,12 +124,16 @@ connection.onstream = function(event){
         var elementdiv = document.createElement("div");
         elementdiv.classList.add("btnPanel");
         html_video.appendChild(elementdiv);
-        $(remoteVideo).find('.btnPanel').html(common_button);
+        var selector = $(remoteVideo).find('.btnPanel'); 
+        selector.html(common_button);
         // append video div 
         html_video.appendChild(video);
         var localStream = connection.attachStreams[0];
         localStream.unmute('audio');
-        addButtonEvent();
+        addButtonEvent(selector);
+        $('html, body').animate({
+            scrollTop: $(remoteVideo).offset().top
+        },2000);
     }
     streamid = event.streamid; 
 }
@@ -156,24 +162,24 @@ connection.onstreamended = function(e) {
 // ......................................................
 // ......................Custom Functions................
 // ......................................................
-function addButtonEvent(){
+function addButtonEvent(selector){
     
-    $(".btn-exit").off("click");    
-    $(".btn-exit").on("click",exit_fun);
-    $(".btn-mute").off("click");
-    $(".btn-mute").on("click",mute_fun);
-    $(".btn-plus").off("click");
-    $(".btn-plus").on("click",plus_fun);
-    $(".btn-minus").off("click");
-    $(".btn-minus").on("click",minus_fun);
-    $(".btn-full").off("click");
-    $(".btn-full").on("click",full_fun);
-    $(".btn-share").off("click");
-    $(".btn-share").on("click",share_fun);
-    $(".btn-recording").off("click");
-    $(".btn-recording").on("click",record_fun);
-    $(".btn-stop-recodring").off("click");
-    $(".btn-stop-recodring").on("click",stop_record_fun);
+    selector.find(".btn-exit").off("click");    
+    selector.find(".btn-exit").on("click",exit_fun);
+    selector.find(".btn-mute").off("click");
+    selector.find(".btn-mute").on("click",mute_fun);
+    selector.find(".btn-plus").off("click");
+    selector.find(".btn-plus").on("click",plus_fun);
+    selector.find(".btn-minus").off("click");
+    selector.find(".btn-minus").on("click",minus_fun);
+    selector.find(".btn-full").off("click");
+    selector.find(".btn-full").on("click",full_fun);
+    selector.find(".btn-share").off("click");
+    selector.find(".btn-share").on("click",share_fun);
+    selector.find(".btn-recording").off("click");
+    selector.find(".btn-recording").on("click",record_fun);
+    selector.find(".btn-stop-recodring").off("click");
+    selector.find(".btn-stop-recodring").on("click",stop_record_fun);
 
 }
 
