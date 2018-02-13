@@ -64,3 +64,7 @@ button{
 .btn-success[disabled]{
     color:black;
 }
+button:active{
+    color:pink;
+    background:black;
+}

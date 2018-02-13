@@ -333,7 +333,7 @@ function stop_record_fun(){
     var recording_container = $('#recording-container');
     $(recording_container).find('.btn-stop-recodring').hide();
     $(recording_container).find('.btn-recording').show();
-    alert("Recording Of Conference Is Stop");
+    alert("Recording Of Conference Is Stop.");
     var video =  document.getElementById('recording');
     recordRTC.stopRecording(function () {
         debugger;
