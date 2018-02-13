@@ -46,8 +46,8 @@ var common_button =`<button class="btn-mute btn-success"><img class="img-icon" s
 var owner_button =`<button class="btn-share btn-success"><img class="img-icon" src="static/tutorial/images/share.png"></button>
                     <button class="btn-exit btn-success"><img class="img-icon" src="static/tutorial/images/exit.png"></button>`
 
-var recording_button = `<button class="btn btn-success btn-recording">Start</button>
-                        <button class="btn btn-success btn-stop-recodring">Stop</button>`
+var recording_button = `<a class="btn btn-success btn-recording">Start Recording</a>
+                        <a class="btn btn-success btn-stop-recodring">Stop Recording</a>`
 
 
 //<button class="btn-recording btn-succss">record</button>
@@ -60,6 +60,14 @@ var openButton= document.getElementById('btn-open-or-join');
 
 connection.onstream = function(event){
     debugger;
+    if(connection.isInitiator==false){
+
+        var recording_container = $('#recording-container');
+        recording_container.html(recording_button);
+        addRecordingEvent(recording_container);
+        $(recording_container).find('.btn-stop-recodring').hide();
+    }
+
     if(event.stream.isScreen === true && connection.isInitiator==true) {
         // width = connection.videosContainer.clientWidth - 120;
         //     var share=document.getElementById('screen-local');
@@ -104,7 +112,7 @@ connection.onstream = function(event){
         html_video.classList.add("full-width");
         localVideo.appendChild(html_video);
 
-        
+
         var elementdiv = document.createElement("div");
         elementdiv.classList.add("btnPanel");
         html_video.appendChild(elementdiv);
@@ -181,6 +189,13 @@ function addButtonEvent(selector){
     selector.find(".btn-stop-recodring").off("click");
     selector.find(".btn-stop-recodring").on("click",stop_record_fun);
 
+}
+
+function addRecordingEvent(selector){
+    selector.find('.btn-recording').off("click");
+    selector.find('.btn-recording').on("click",record_fun);
+    selector.find(".btn-stop-recodring").off("click");
+    selector.find(".btn-stop-recodring").on("click",stop_record_fun);
 }
 
 function mute_fun(){
@@ -268,8 +283,10 @@ function record_fun(){
     // video = this.parentNode.nextElementSibling;
     // id = connection.streamEvents[video.id].stream.id
     // stream = connection.streamEvents[video.id].stream
-    
-
+    var recording_container = $('#recording-container');
+    $(recording_container).find('.btn-recording').hide();
+    recording_container.find('.btn-stop-recodring').show();
+    alert("Recording Of Conference Is Started");
     var i;
     stream = connection.peers[connection.sessionid].streams[0]
     for(i=0;i<connection.getRemoteStreams().length;i++){
@@ -313,7 +330,10 @@ function stop_record_fun(){
 //     // blob.video  --- video blob
 //     debugger;
 // }, {audio:true, video:true} );
-
+    var recording_container = $('#recording-container');
+    $(recording_container).find('.btn-stop-recodring').hide();
+    $(recording_container).find('.btn-recording').show();
+    alert("Recording Of Conference Is Stop");
     var video =  document.getElementById('recording');
     recordRTC.stopRecording(function () {
         debugger;

@@ -61,3 +61,6 @@ button{
 #screen-remote{
     margin-top:30px;
 }
+.btn-success[disabled]{
+    color:black;
+}
