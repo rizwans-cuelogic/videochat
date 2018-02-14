@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render,redirect
 import uuid
+from django.views.decorators.csrf import csrf_exempt
+
 # Create your views here.
 
 global_rooms = {}
@@ -31,3 +33,11 @@ def createroom(request):
 def room(request,room):
 
 	return render(request,'tutorial/home.html') 
+
+@csrf_exempt
+def videoconverter(request):
+
+	import pdb
+	pdb.set_trace()
+
+	print("video converter")

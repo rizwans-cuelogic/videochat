@@ -199,6 +199,7 @@ function addRecordingEvent(selector){
 }
 
 function mute_fun(){
+    debugger;
     video = this.parentNode.nextElementSibling;
     connection.streamEvents[video.id].stream.mute('audio');
 }
@@ -249,12 +250,15 @@ function exit_fun() {
             
             // TODO : Correct this code line for remove
             $('.btnPanel').remove();
+
         });
     } else {
+
         connection.leave();
         connection.attachStreams.forEach(function(stream) {
             stream.stop();
         });
+        $('#recording-container').remove();
     }
 }
 
@@ -283,6 +287,7 @@ function record_fun(){
     // video = this.parentNode.nextElementSibling;
     // id = connection.streamEvents[video.id].stream.id
     // stream = connection.streamEvents[video.id].stream
+    
     var recording_container = $('#recording-container');
     $(recording_container).find('.btn-recording').hide();
     recording_container.find('.btn-stop-recodring').show();
@@ -301,13 +306,6 @@ function record_fun(){
         console.log("stream is undefined")
     }
 
-    
-    //stream = connection.streamEvents[stream_id].stream
-    // connection.streams[id].startRecording({
-    //     audio: true,
-    //     video: true
-    // });
-
     var options = {
         mimeType: 'video/webm', // or video/webm\;codecs=h264 or video/webm\;codecs=vp9
         // audioBitsPerSecond: 128000,
@@ -321,31 +319,61 @@ function record_fun(){
 
 }
 
+function postFiles(){
+
+    var recordedBlob = recordRTC.getBlob();
+    console.log(recordedBlob)
+    // $.ajax({
+    //     url: 'videoconverter/',
+    //     data:{'blob':recordedBlob},
+    //     dataType: 'json',
+    //     type: 'post',
+    //     success: function (result) {
+    //         window.open(url);
+    //     }
+    // });
+
+    var fileName = generateRandomString() + '.webm';
+
+    var file = new File([recordedBlob], fileName, {
+                    type: 'video/webm'
+                });
+    xhr('videoconverter/', file, function(responseText) {
+        console.log(responseText);
+    });
+
+}
+function generateRandomString() {
+            if (window.crypto) {
+                var a = window.crypto.getRandomValues(new Uint32Array(3)),
+                    token = '';
+                for (var i = 0, l = a.length; i < l; i++) token += a[i].toString(36);
+                return token;
+            } else {
+                return (Math.random() * new Date().getTime()).toString(36).replace( /\./g , '');
+            }
+        }
 function stop_record_fun(){
 
-//     video = this.parentNode.nextElementSibling;
-//    connection.streams[video.id].stopRecording(function (blob) {
-//     // POST both audio/video "Blobs" to PHP/other server using single FormData/XHR2
-//     // blob.audio  --- audio blob
-//     // blob.video  --- video blob
-//     debugger;
-// }, {audio:true, video:true} );
+    
     var recording_container = $('#recording-container');
     $(recording_container).find('.btn-stop-recodring').hide();
     $(recording_container).find('.btn-recording').show();
     alert("Recording Of Conference Is Stop.");
     var video =  document.getElementById('recording');
-    recordRTC.stopRecording(function () {
-        debugger;
-        var recordedBlob = recordRTC.getBlob();
-        var url = URL.createObjectURL(recordedBlob);
+    var recordedBlob;
+    debugger;
+    // recordRTC.stopRecording(function () {
+        
+    //     recordedBlob = recordRTC.getBlob();
+        //var url = URL.createObjectURL(recordedBlob);
         // video.src = url;
-        convertStreams(recordedBlob);
-        window.open(url);
+        //convertStreams(recordedBlob);
 
+        //window.open(url);
+    //});
 
-        // recordRTC.getDataURL(function(dataURL) { window.open(dataURL); });
-    });
+    recordRTC.stopRecording(postFiles)
 }
 connection.getScreenConstraints = function(callback) {
     debugger;
@@ -359,6 +387,7 @@ connection.getScreenConstraints = function(callback) {
     });
 };
 debugger;
+
 var workerPath = 'https://archive.org/download/ffmpeg_asm/ffmpeg_asm.js';
 if(document.domain == 'localhost') {
     workerPath = location.href.replace(location.href.split('/').pop(), '') + 'ffmpeg_asm.js';
