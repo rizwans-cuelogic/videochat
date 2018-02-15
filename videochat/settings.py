@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'channels',
     'tutorial.apps.TutorialConfig',
     #'sslserver'
+    'django_ffmpeg'
 ]
 
 MIDDLEWARE = [
@@ -131,3 +132,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT='static'
+
+MEDIA_URL='/media_cdn/'
+MEDIA_ROOT=os.path.join(BASE_DIR,"media_cdn")
+
+FFMPEG_BIN = 'ffmpeg'
+

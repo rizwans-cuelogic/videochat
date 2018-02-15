@@ -323,25 +323,29 @@ function postFiles(){
 
     var recordedBlob = recordRTC.getBlob();
     console.log(recordedBlob)
-    // $.ajax({
-    //     url: 'videoconverter/',
-    //     data:{'blob':recordedBlob},
-    //     dataType: 'json',
-    //     type: 'post',
-    //     success: function (result) {
-    //         window.open(url);
-    //     }
-    // });
-
+    
     var fileName = generateRandomString() + '.webm';
 
     var file = new File([recordedBlob], fileName, {
                     type: 'video/webm'
                 });
     xhr('videoconverter/', file, function(responseText) {
-        console.log(responseText);
+        alert(responseText);
     });
 
+}
+
+function xhr(url, data, callback) {
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function() {
+        if (request.readyState == 4 && request.status == 200) {
+            callback(request.responseText);
+        }
+    };
+    request.open('POST', url);
+    var formData = new FormData();
+    formData.append('file', data);
+    request.send(formData);
 }
 function generateRandomString() {
             if (window.crypto) {
@@ -354,7 +358,6 @@ function generateRandomString() {
             }
         }
 function stop_record_fun(){
-
     
     var recording_container = $('#recording-container');
     $(recording_container).find('.btn-stop-recodring').hide();
@@ -385,100 +388,4 @@ connection.getScreenConstraints = function(callback) {
         }
         throw error;
     });
-};
-debugger;
-
-var workerPath = 'https://archive.org/download/ffmpeg_asm/ffmpeg_asm.js';
-if(document.domain == 'localhost') {
-    workerPath = location.href.replace(location.href.split('/').pop(), '') + 'ffmpeg_asm.js';
-}
-function processInWebWorker() {
-    debugger;
-    var blob = URL.createObjectURL(new Blob(['importScripts("' + workerPath + '");var now = Date.now;function print(text) {postMessage({"type" : "stdout","data" : text});};onmessage = function(event) {var message = event.data;if (message.type === "command") {var Module = {print: print,printErr: print,files: message.files || [],arguments: message.arguments || [],TOTAL_MEMORY: message.TOTAL_MEMORY || false};postMessage({"type" : "start","data" : Module.arguments.join(" ")});postMessage({"type" : "stdout","data" : "Received command: " +Module.arguments.join(" ") +((Module.TOTAL_MEMORY) ? ".  Processing with " + Module.TOTAL_MEMORY + " bits." : "")});var time = now();var result = ffmpeg_run(Module);var totalTime = now() - time;postMessage({"type" : "stdout","data" : "Finished processing (took " + totalTime + "ms)"});postMessage({"type" : "done","data" : result,"time" : totalTime});}};postMessage({"type" : "ready"});'], {
-        type: 'application/javascript'
-    }));
-    var worker = new Worker(blob);
-    URL.revokeObjectURL(blob);
-    return worker;
-}
-var worker;
-
-function convertStreams(videoBlob) {
-    var aab;
-    var buffersReady;
-    var workerReady;
-    var posted;
-    var fileReader = new FileReader();
-    fileReader.onload = function() {
-        aab = this.result;
-        postMessage();
-    };
-    fileReader.readAsArrayBuffer(videoBlob);
-    if (!worker) {
-        worker = processInWebWorker();
-    }
-    worker.onmessage = function(event) {
-        var message = event.data;
-        if (message.type == "ready") {
-            log('<a href="'+ workerPath +'" download="ffmpeg-asm.js">ffmpeg-asm.js</a> file has been loaded.');
-            workerReady = true;
-            if (buffersReady)
-                postMessage();
-        } else if (message.type == "stdout") {
-            log(message.data);
-        } else if (message.type == "start") {
-            log('<a href="'+ workerPath +'" download="ffmpeg-asm.js">ffmpeg-asm.js</a> file received ffmpeg command.');
-        } else if (message.type == "done") {
-            log(JSON.stringify(message));
-            var result = message.data[0];
-            log(JSON.stringify(result));
-            var blob = new File([result.data], 'test.mp4', {
-                type: 'video/mp4'
-            });
-            log(JSON.stringify(blob));
-            PostBlob(blob);
-        }
-    };
-    var postMessage = function() {
-        posted = true;
-        worker.postMessage({
-            type: 'command',
-            arguments: '-i video.webm -c:v mpeg4 -b:v 6400k -strict experimental output.mp4'.split(' '),
-            files: [
-                {
-                    data: new Uint8Array(aab),
-                    name: 'video.webm'
-                }
-            ]
-        });
-    };
-}
-function PostBlob(blob) {
-
-    var inner = document.querySelector('.inner');
-    var video = document.createElement('video');
-    video.controls = true;
-    var source = document.createElement('source');
-    source.src = URL.createObjectURL(blob);
-    source.type = 'video/mp4; codecs=mpeg4';
-    video.appendChild(source);
-    video.download = 'Play mp4 in VLC Player.mp4';
-    inner.appendChild(document.createElement('hr'));
-    var h3 = document.createElement('h3');
-    h3.innerHTML = '<a href="' + source.src + '" target="_blank" download="Play mp4 in VLC Player.mp4">Download Converted mp4</a>';
-    inner.appendChild(h3);
-    h3.style.display = 'block';
-    inner.appendChild(video);
-}
-var logsPreview = document.getElementById('logs-preview');
-function log(message) {
-    // var li = document.createElement('li');
-    // li.innerHTML = message;
-    // logsPreview.appendChild(li);
-    // li.tabIndex = 0;
-    // li.focus();
-    console.log(message);
-}
-window.onbeforeunload = function() {
-    document.querySelector('#record-video').disabled = false;
 };

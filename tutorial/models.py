@@ -16,3 +16,9 @@ class Message(models.Model):
     handle = models.TextField()
     message = models.TextField()
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
+
+
+class RecordVideo(models.Model):
+
+	recorded_file = models.FileField(upload_to='recorded_video/webm/')
+
